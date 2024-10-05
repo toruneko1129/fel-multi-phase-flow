@@ -1,0 +1,14 @@
+      x1=rnx00*xgp1
+      x2=rnx00*xgp2
+      y1=rny00*ygp1
+      y2=rny00*ygp2
+      z1=rnz00*zgp1
+      z2=rnz00*zgp2
+      x111=x1+y1+z1
+      x211=x2+y1+z1
+      x121=x1+y2+z1
+      x221=x2+y2+z1
+      x112=x1+y1+z2
+      x212=x2+y1+z2
+      x122=x1+y2+z2
+      x222=x2+y2+z2

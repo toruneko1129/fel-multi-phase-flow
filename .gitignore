@@ -1,0 +1,9 @@
+#object file
+objs/*
+
+#binary file
+a.out
+
+#results file
+results/*
+!results/.gitkeep
