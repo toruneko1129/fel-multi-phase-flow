@@ -14,7 +14,7 @@ real(8),dimension(:),allocatable :: dyinv_array
 integer irestart
 integer ni,nj,nk
 integer nbub
-parameter (nbub=2)              !change 
+parameter (nbub=0)              !change 
 real(8) :: xxc(nbub),yyc(nbub),zzc(nbub)
 
 real(8) :: pi,cfl,time,dt,xl,yl,zl,dx,dy,dz,dxinv,dyinv,dzinv
@@ -74,9 +74,9 @@ real(8) :: center_pre1,center_pre2,velocity
 
 ! the number of grid points over the entire region
 !!!!
-svall(1)=256
-svall(2)=64
-svall(3)=256
+svall(1)=32
+svall(2)=8
+svall(3)=2
 
 ! irestart=1 if computation will be restarted (input data are needed).
 ! irestart=0 if computation will be started from t=0.
@@ -137,21 +137,20 @@ pi=atan(1.0d0)*4.0d0
 ! dx, dy, dz: grid widths
 
 !!!!
-xl=16.0d-3       
-yl=4.0d-3
-zl=16.0d-3
+xl=6.8d1  
+yl=1.36d1
+zl=4.25
 
-rhol=1000.0d0
-rhog=100.0d0
-rmul=1.5d-3
-rmug=1.5d-4
-surface_tension=7.28d-2
+rhol=8.1d-1
+rhog=8.1d-1
+rmul=1.95d0
+rmug=1.95d0
+surface_tension=5.5d0
 
 !calculation gravity 
 !!!!
-!grv =0.0d0
-grv =9.81d0
-angle_deg=60.0d0
+grv =0.0d0
+angle_deg=0.0d0
 angle_rad=angle_deg*pi/180.0d0
 grvb=grv*sin(angle_rad)
 grvp=-grv*cos(angle_rad)
@@ -197,7 +196,7 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =10
+nmax    =10000
 idout   =10000
 imkuvp  =1000
 imkvtk  =imkuvp
@@ -253,37 +252,6 @@ endif
 
 if(irestart.eq.0)then
 write(*,'("START")')
-
-!xxc(1)=xl*0.5d0
-!yyc(1)=yl*0.5d0
-!zzc(1)=zl*0.5d0
- do i=1,nbub
- yyc(i)=yl*0.25d0
- enddo
- 
- xxc(1) = particle_radius*2.0d0
- xxc(2) = particle_radius*6.0d0
-
- 
- zzc(1) = zl*0.4375d0
- zzc(2) = zl*0.5d0
-
- 
-
-do l=1,nbub
-particle_init_x=xxc(l)
-particle_init_y=yyc(l)
-particle_init_z=zzc(l)
-call init_phi(ID,ndiv,svall,xl,yl,zl,dx,dy,dz,bet_mthinc &
-              ,particle_radius,particle_init_x,particle_init_y,particle_init_z &
-              ,phi,nbub,l)
-if(ID.eq.0)then
-write(*,'("l,xxc,yyc,zzc",1i10,10e20.10)')l,particle_init_x,particle_init_y,particle_init_z
-endif
-enddo
-
-call mpi_barrier(mpi_comm_world,ierr)
-call flush(6)
 
 do l=1,nbub
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
@@ -644,6 +612,12 @@ call flush(6)
 !ccc
 !ccc<output data
 !ccc
+if(mod(nstep,imon_t).eq.0)then                                               
+  write(*,'("nstep              ",1i9)')
+  do j = 0, nj
+  write(*,'("u= ", E20.10)') (u(ni/2, j, 1)+u(ni/2, j+1, 1))/2
+  enddo
+endif
 
 if(mod(nstep,idout).eq.0)then                                               
   call dataou(ipara,ID,ni,nj,nk,nbub,nstep,time,u,v,w,p,uo,vo,wo,po,phi)
