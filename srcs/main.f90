@@ -74,8 +74,8 @@ real(8) :: center_pre1,center_pre2,velocity
 
 ! the number of grid points over the entire region
 !!!!
-svall(1)=64
-svall(2)=16
+svall(1)=128
+svall(2)=32
 svall(3)=2
 
 ! irestart=1 if computation will be restarted (input data are needed).
@@ -149,8 +149,8 @@ surface_tension=5.5d0
 
 !calculation gravity 
 !!!!
-grv =0.0d0
-angle_deg=0.0d0
+grv =9.81d0
+angle_deg=30.0d0
 angle_rad=angle_deg*pi/180.0d0
 grvb=grv*sin(angle_rad)
 grvp=-grv*cos(angle_rad)
@@ -196,11 +196,11 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =1000
-idout   =10000
-imkuvp  =1000
+nmax    =20000
+idout   =100000
+imkuvp  =100000
 imkvtk  =imkuvp
-imon_t  =20
+imon_t  =5000
 ibudget =imon_t
 
 time=0.0d0
@@ -402,7 +402,7 @@ endif
 !local change need to fix
 !call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !call mpi_barrier(mpi_comm_world,ierr)
-dt = 0.5d-1
+dt = 0.2d-2
 time = time + dt
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
 write(*,'("time=",1e17.10," dt=",1e17.10)'), time, dt
