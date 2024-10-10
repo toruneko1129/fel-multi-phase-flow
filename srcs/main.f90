@@ -74,8 +74,8 @@ real(8) :: center_pre1,center_pre2,velocity
 
 ! the number of grid points over the entire region
 !!!!
-svall(1)=32
-svall(2)=8
+svall(1)=64
+svall(2)=16
 svall(3)=2
 
 ! irestart=1 if computation will be restarted (input data are needed).
@@ -196,11 +196,11 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =10000
+nmax    =1000
 idout   =10000
 imkuvp  =1000
 imkvtk  =imkuvp
-imon_t  =10
+imon_t  =20
 ibudget =imon_t
 
 time=0.0d0
@@ -399,8 +399,14 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
-call mpi_barrier(mpi_comm_world,ierr)
+!local change need to fix
+!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+!call mpi_barrier(mpi_comm_world,ierr)
+dt = 0.5d-1
+time = time + dt
+if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
+write(*,'("time=",1e17.10," dt=",1e17.10)'), time, dt
+endif
 call flush(6)
 
 do l=1,nbub
@@ -613,9 +619,9 @@ call flush(6)
 !ccc<output data
 !ccc
 if(mod(nstep,imon_t).eq.0)then                                               
-  write(*,'("nstep              ",1i9)')
+  write(*, *) 'velocity u'
   do j = 1, nj
-  write(*,'("y= ", F10.5, " u= ", E20.10)') dy*(j+0.5d0), u(ni/2, j, 1)
+  write(*,'("y= ", F10.5, " u= ", E20.10)') dy*(j-0.5d0), u(ni/2, j, 1)
   enddo
 endif
 
