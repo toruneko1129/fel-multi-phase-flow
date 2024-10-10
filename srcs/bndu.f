@@ -19,7 +19,7 @@ ccc<j
 ccc
 ccc
 
-      uwall = 0.5d0
+      uwall = 0.25d0
 
       if(nID(Y_MINUS).lt.0)then
 !$OMP  PARALLEL DO

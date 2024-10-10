@@ -614,8 +614,8 @@ call flush(6)
 !ccc
 if(mod(nstep,imon_t).eq.0)then                                               
   write(*,'("nstep              ",1i9)')
-  do j = 0, nj
-  write(*,'("u= ", E20.10)') (u(ni/2, j, 1)+u(ni/2, j+1, 1))/2
+  do j = 1, nj
+  write(*,'("y= ", F10.5, " u= ", E20.10)') dy*(j+0.5d0), u(ni/2, j, 1)
   enddo
 endif
 
