@@ -14,11 +14,11 @@ real(8),dimension(:),allocatable :: dyinv_array
 integer irestart
 integer ni,nj,nk
 integer nbub
-parameter (nbub=2)              !change 
+parameter (nbub=0)              !change 
 real(8) :: xxc(nbub),yyc(nbub),zzc(nbub)
 
 real(8) :: pi,cfl,time,dt,xl,yl,zl,dx,dy,dz,dxinv,dyinv,dzinv
-real(8) :: surface_tension,rhol,rhog,rmul,rmug,grv,grvb,grvp,angle_deg,angle_rad
+real(8) :: surface_tension,rhol,rhog,rmul,rmug,grv,grvb,grvp,angle_deg,angle_rad,uwall
 real(8) :: bet_mthinc
 real(8) :: particle_radius,particle_init_x,particle_init_y,particle_init_z
 integer nmax,idout,imkuvp,imkvtk,ibudget,imon_t,nstep,nstep0
@@ -74,9 +74,9 @@ real(8) :: center_pre1,center_pre2,velocity
 
 ! the number of grid points over the entire region
 !!!!
-svall(1)=256
-svall(2)=64
-svall(3)=256
+svall(1)=32
+svall(2)=8
+svall(3)=2
 
 ! irestart=1 if computation will be restarted (input data are needed).
 ! irestart=0 if computation will be started from t=0.
@@ -135,23 +135,25 @@ pi=atan(1.0d0)*4.0d0
 ! particle_init_[xyz]: initial position from the origin at the system centroid
 ! ni, nj, nk: the numbers of grid points
 ! dx, dy, dz: grid widths
+! uwall: wall velocity
 
 !!!!
-xl=16.0d-3       
-yl=4.0d-3
-zl=16.0d-3
+xl=6.8d1  
+yl=1.36d1
+zl=4.25
 
-rhol=1000.0d0
-rhog=100.0d0
-rmul=1.5d-3
-rmug=1.5d-4
-surface_tension=7.28d-2
+rhol=8.1d-1
+rhog=8.1d-1
+rmul=1.95d0
+rmug=1.95d0
+surface_tension=5.5d0
+
+uwall = 0.25d0
 
 !calculation gravity 
 !!!!
-!grv =0.0d0
 grv =9.81d0
-angle_deg=60.0d0
+angle_deg=0.0d0
 angle_rad=angle_deg*pi/180.0d0
 grvb=grv*sin(angle_rad)
 grvp=-grv*cos(angle_rad)
@@ -197,11 +199,11 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =10
-idout   =10000
-imkuvp  =1000
+nmax    =10000
+idout   =100000
+imkuvp  =100000
 imkvtk  =imkuvp
-imon_t  =10
+imon_t  =20
 ibudget =imon_t
 
 time=0.0d0
@@ -254,37 +256,6 @@ endif
 if(irestart.eq.0)then
 write(*,'("START")')
 
-!xxc(1)=xl*0.5d0
-!yyc(1)=yl*0.5d0
-!zzc(1)=zl*0.5d0
- do i=1,nbub
- yyc(i)=yl*0.25d0
- enddo
- 
- xxc(1) = particle_radius*2.0d0
- xxc(2) = particle_radius*6.0d0
-
- 
- zzc(1) = zl*0.4375d0
- zzc(2) = zl*0.5d0
-
- 
-
-do l=1,nbub
-particle_init_x=xxc(l)
-particle_init_y=yyc(l)
-particle_init_z=zzc(l)
-call init_phi(ID,ndiv,svall,xl,yl,zl,dx,dy,dz,bet_mthinc &
-              ,particle_radius,particle_init_x,particle_init_y,particle_init_z &
-              ,phi,nbub,l)
-if(ID.eq.0)then
-write(*,'("l,xxc,yyc,zzc",1i10,10e20.10)')l,particle_init_x,particle_init_y,particle_init_z
-endif
-enddo
-
-call mpi_barrier(mpi_comm_world,ierr)
-call flush(6)
-
 do l=1,nbub
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
@@ -296,9 +267,9 @@ call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
 call summation(ni,nj,nk,phi,nbub)
 
-call bndu(nID,ni,nj,nk,u ,v ,w )
-call bndu(nID,ni,nj,nk,uo,vo,wo)
-call bndu(nID,ni,nj,nk,un,vn,wn)
+call bndu(nID,ni,nj,nk,u ,v ,w ,uwall)
+call bndu(nID,ni,nj,nk,uo,vo,wo,uwall)
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall)
 call bnd_periodic(ni,nj,nk,u )
 call bnd_periodic(ni,nj,nk,v )
 call bnd_periodic(ni,nj,nk,w )
@@ -334,8 +305,8 @@ nstep=0
 if(irestart.eq.1)then
   write(*,'("RESTART")')
   call datain(ipara,ID,ni,nj,nk,nbub,nstep,time,u,v,w,p,uo,vo,wo,po,phi)
-  call bndu(nID,ni,nj,nk,u ,v ,w )
-  call bndu(nID,ni,nj,nk,uo,vo,wo)
+  call bndu(nID,ni,nj,nk,u ,v ,w ,uwall)
+  call bndu(nID,ni,nj,nk,uo,vo,wo,uwall)
   call bnd_periodic(ni,nj,nk,u )
   call bnd_periodic(ni,nj,nk,v )
   call bnd_periodic(ni,nj,nk,w )
@@ -431,8 +402,14 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
-call mpi_barrier(mpi_comm_world,ierr)
+!local change need to fix
+!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+!call mpi_barrier(mpi_comm_world,ierr)
+dt = 0.5d-1
+time = time + dt
+if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
+write(*,'("time=",1e17.10," dt=",1e17.10)'), time, dt
+endif
 call flush(6)
 
 do l=1,nbub
@@ -561,9 +538,9 @@ call solu_sor4(ipara,ID,nID,ndiv,ni,nj,nk,key,sendjb,recvjb &
   , aw_b_w, aw_t_w, aw_p_w         &
   ,au_bw_w,au_tw_w,au_be_w,au_te_w &
   ,av_bs_w,av_ts_w,av_bn_w,av_tn_w &
-  ,src_u,src_v,src_w,un,vn,wn)
+  ,src_u,src_v,src_w,un,vn,wn,uwall)
 
-call bndu(nID,ni,nj,nk,un,vn,wn)
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall)
 call bnd_periodic(ni,nj,nk,un)
 call bnd_periodic(ni,nj,nk,vn)
 call bnd_periodic(ni,nj,nk,wn)
@@ -588,7 +565,7 @@ call solp_fft_tdma4(ipara,ID,ndiv,ni,nj,nk,nstep,imon_t,rhog,dxinv,dyinv,dzinv,d
 
 call corunp_explicit(nID,ni,nj,nk,rhog,dxinv,dyinv,dzinv,dt,dp,phat,un,vn,wn,pn)
 
-call bndu(nID,ni,nj,nk,un,vn,wn)
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall)
 call bnd_periodic(ni,nj,nk,un)
 call bnd_periodic(ni,nj,nk,vn)
 call bnd_periodic(ni,nj,nk,wn)
@@ -644,6 +621,12 @@ call flush(6)
 !ccc
 !ccc<output data
 !ccc
+if(mod(nstep,imon_t).eq.0)then                                               
+  write(*, *) 'velocity u'
+  do j = 1, nj
+  write(*,'("y= ", F10.5, " u= ", E20.10)') dy*(j-0.5d0), u(ni/2, j, 1)
+  enddo
+endif
 
 if(mod(nstep,idout).eq.0)then                                               
   call dataou(ipara,ID,ni,nj,nk,nbub,nstep,time,u,v,w,p,uo,vo,wo,po,phi)

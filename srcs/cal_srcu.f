@@ -70,7 +70,7 @@
      5 + vis_u(i,j,k)/rho00*0.5d0
      6 + fst_u(i,j,k)*0.5d0
      7 +fst_un(i,j,k)*0.5d0
-     8 + grvb*(rho_av/rho00-1.0d0) 
+     8 + grvb
       enddo
       enddo
       enddo
@@ -101,7 +101,7 @@
      5 + vis_v(i,j,k)/rho00*0.5d0
      6 + fst_v(i,j,k)*0.5d0
      7 +fst_vn(i,j,k)*0.5d0
-     8 + grvp*(rho_av/rho00-1.0d0)
+     8 + grvp
        enddo
       enddo
       enddo
