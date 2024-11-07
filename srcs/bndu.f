@@ -1,7 +1,7 @@
 ccc
 ccc<impose boundary conditions on the velocity components uk,vk,wk
 ccc
-      subroutine bndu(nID,ni,nj,nk,uk,vk,wk)
+      subroutine bndu(nID,ni,nj,nk,uk,vk,wk,uwall)
 
       implicit none
       include 'param.h'
@@ -18,8 +18,6 @@ ccc
 ccc<j
 ccc
 ccc
-
-      uwall = 0.0d0
 
       if(nID(Y_MINUS).lt.0)then
 !$OMP  PARALLEL DO
