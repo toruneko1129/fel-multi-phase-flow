@@ -205,9 +205,9 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =200
+nmax    =10000
 idout   =100000
-imkuvp  =10
+imkuvp  =100
 imkvtk  =imkuvp
 imon_t  =100
 ibudget =imon_t
@@ -279,8 +279,9 @@ enddo
 
 
 do l=1,nbub
-!call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
-call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
+!>contact angle condition
+call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
+!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi(-2,-2,-2,l))
 enddo
@@ -311,8 +312,9 @@ call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,un)
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,vn)
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,wn)
 
-!call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,0))
-call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
+!>contact angle condition
+call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,0))
+!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,0))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi(-2,-2,-2,0))
 
@@ -345,8 +347,9 @@ if(irestart.eq.1)then
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,vo)
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,wo)
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,po)
-  !call bnd_neumann(nID,ni,nj,nk,phi )
-  call bnd_dirichlet(nID,ni,nj,nk,phi)
+  !>contact angle condition
+  call bnd_neumann(nID,ni,nj,nk,phi )
+  !call bnd_dirichlet(nID,ni,nj,nk,phi)
   call bnd_periodic(ni,nj,nk,phi )
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi )
 endif
@@ -447,8 +450,9 @@ call solphi_mthinc1(ni,nj,nk,dxinv,dyinv,dzinv,dt,bet_mthinc,phi(-2,-2,-2,l),phi
 call solphi_mthinc2(ni,nj,nk,dxinv,dyinv,dzinv,dt,u,v,w,flphix,flphiy,flphiz,phi(-2,-2,-2,l),phin(-2,-2,-2,l))
 call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phin(-2,-2,-2,l),phix,phiy,phiz)
 call solphi_mthinc3(ipara,ni,nj,nk,dxinv,dyinv,dzinv,bet_mthinc,phix,phiy,phiz,phi(-2,-2,-2,l),phin(-2,-2,-2,l))
-!call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
-call bnd_dirichlet(nID,ni,nj,nk,phin(-2,-2,-2,l))
+!>contact angle condition
+call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
+!call bnd_dirichlet(nID,ni,nj,nk,phin(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,l))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,l))
 enddo
@@ -457,8 +461,9 @@ call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
 
 call summation(ni,nj,nk,phin,nbub)
-!call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,0))
-call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,0))
+!>contact angle condition
+call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,0))
+!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,0))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,0))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,0))
 
@@ -644,17 +649,6 @@ enddo
 
 call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
-
-
-!ccc
-!ccc<output data
-!ccc
-if(mod(nstep,imon_t).eq.0)then                                               
-  write(*, *) 'velocity u'
-  do j = 1, nj
-  write(*,'("y= ", F10.5, " u= ", E20.10)') dy*(j-0.5d0), u(ni/2, j, 1)
-  enddo
-endif
 
 if(mod(nstep,idout).eq.0)then                                               
   call dataou(ipara,ID,ni,nj,nk,nbub,nstep,time,u,v,w,p,uo,vo,wo,po,phi)
