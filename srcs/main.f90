@@ -3,6 +3,9 @@ implicit none
 include 'mpif.h'
 include 'param.h'
 
+!nsv: number of mesh
+!svall: use svn to determine mesh resolution
+integer :: nsv
 integer :: svall(3)
 integer :: ierr,ndiv,ID,ipara
 integer :: nID(6)
@@ -14,7 +17,7 @@ real(8),dimension(:),allocatable :: dyinv_array
 integer irestart
 integer ni,nj,nk
 integer nbub
-parameter (nbub=0)              !change 
+parameter (nbub=1)              !change 
 real(8) :: xxc(nbub),yyc(nbub),zzc(nbub)
 
 real(8) :: pi,cfl,time,dt,xl,yl,zl,dx,dy,dz,dxinv,dyinv,dzinv
@@ -73,9 +76,12 @@ real(8) :: rho_av,rhon_av
 real(8) :: center_pre1,center_pre2,velocity
 
 ! the number of grid points over the entire region
+!in Legendre case, use (8svn, svn, 2)
 !!!!
-svall(1)=32
-svall(2)=8
+nsv=8
+
+svall(1)=nsv*8
+svall(2)=nsv
 svall(3)=2
 
 ! irestart=1 if computation will be restarted (input data are needed).
@@ -138,7 +144,7 @@ pi=atan(1.0d0)*4.0d0
 ! uwall: wall velocity
 
 !!!!
-xl=6.8d1  
+xl=1.36d2
 yl=1.36d1
 zl=4.25
 
@@ -392,7 +398,6 @@ endif
 call cal_coef_prs(svall(2),rhog,dxinv,dyinv,dzinv,aw_p,ae_p,as_p,an_p,ab_p,at_p,ap_p)
 call cal_coef_solp_fft(svall(2),as_p,an_p,as_p_fft,an_p_fft,ap_p_fft)
 
-
 !ccc
 !ccc<main routine
 !ccc
@@ -402,11 +407,8 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-!local change need to fix
-!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
-!call mpi_barrier(mpi_comm_world,ierr)
-dt = 0.5d-1
-time = time + dt
+call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
 write(*,'("time=",1e17.10," dt=",1e17.10)'), time, dt
 endif
