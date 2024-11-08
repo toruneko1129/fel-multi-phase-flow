@@ -154,7 +154,7 @@ rmul=1.95d0
 rmug=1.95d0
 surface_tension=5.5d0
 
-uwall = 0.25d0
+uwall = 0.0d0
 
 !calculation gravity 
 !!!!
@@ -205,11 +205,11 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =10000
+nmax    =200
 idout   =100000
-imkuvp  =100000
+imkuvp  =10
 imkvtk  =imkuvp
-imon_t  =20
+imon_t  =100
 ibudget =imon_t
 
 time=0.0d0
@@ -261,6 +261,22 @@ endif
 
 if(irestart.eq.0)then
 write(*,'("START")')
+
+!for tow phase flow, nbub must be 1
+call init_phi(ndiv, svall, phi, nbub, 1, nsv)
+
+
+!>debug
+!output phi
+write(*,'("phi value")')
+k = 0
+do j = -2, nj + 3
+do i = -2, ni + 3
+write(*, '(I0)', advance='no') int(phi(i, j, k, 1))
+enddo
+write(*, *)
+enddo
+
 
 do l=1,nbub
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
@@ -372,6 +388,16 @@ if(ID.eq.0)then
   !call mkvtk_phil(svall,nstep,dx,dy,dz,phil_all(-2,-2,-2,l),l)
   !enddo
   call mkvtk_phi(svall,nstep,dx,dy,dz,phi_all)
+  !>debug
+  !output phi
+  write(*,'("phi value")')
+  k = 0
+  do j = -2, nj + 3
+  do i = -2, ni + 3
+  write(*, '(I0)', advance='no') int(phi_all(i, j, k))
+  enddo
+  write(*, *)
+  enddo
   call mkvtk_p(svall,nstep,dx,dy,dz,p_all)
   !call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   do l=1,nbub
