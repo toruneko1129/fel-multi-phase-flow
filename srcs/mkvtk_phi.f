@@ -1,11 +1,11 @@
-      subroutine mkvtk_phi(svall,nstep,dx,dy,dz,q)
+      subroutine mkvtk_phi(svall,nstep,time,dx,dy,dz,q)
       implicit none
       integer svall(3),nstep
-      real*8 dx,dy,dz
+      real*8 time,dx,dy,dz
       real*8 q(-2:svall(1)+3,-2:svall(2)+3,-2:svall(3)+3)
 
       character*32 fname
-      integer i,j,k,mi,mj,mk
+      integer i,j,k,mi,mj,mk, time_int
       real*8 q00
 
       mi=svall(1)
@@ -52,16 +52,20 @@
       enddo
 !$OMP  END PARALLEL DO
 
-      write(fname,'("phi_",i7.7,".vtk")')nstep
+      time_int = int(time * 10000.0)
+      write(fname, '("phi_",I0,".vtk")') time_int
       open(10,file=fname,status='replace')
       write(10,"('# vtk DataFile Version 2.0')")
-      write(10,"('t=',I0)")nstep
+      write(10, '("Simulation Output with Time")')
       write(10,"('ASCII')")
       write(10,"('DATASET STRUCTURED_POINTS')")
       write(10,"('DIMENSIONS ',I0,' ',I0,' ',I0)")mi+1,mj+1,mk+1
       write(10,"('ORIGIN ',e11.4,' ',e11.4,' ',e11.4)")0.0,0.0,0.0
       write(10,"('ASPECT_RATIO ',e11.4,' ',e11.4,' ',e11.4)")dx,dy,dz
       write(10,"('')")
+      write(10, '("FIELD FieldData 1")')
+      write(10, '(A, 1X, I0, 1X, I0, 1X, A)') 'Time', 1, 1, 'float'
+      write(10, '(e11.4)') time
       write(10,"('POINT_DATA ',I0)")(mi+1)*(mj+1)*(mk+1)
       write(10,"('SCALARS phi float')")
       write(10,"('LOOKUP_TABLE default')")
