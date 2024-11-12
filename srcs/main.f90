@@ -205,11 +205,11 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =10000
+nmax    =1000
 idout   =100000
-imkuvp  =100
+imkuvp  =10
 imkvtk  =imkuvp
-imon_t  =100
+imon_t  =10
 ibudget =imon_t
 
 time=0.0d0
@@ -390,7 +390,7 @@ if(ID.eq.0)then
   !do l=1,nbub
   !call mkvtk_phil(svall,nstep,dx,dy,dz,phil_all(-2,-2,-2,l),l)
   !enddo
-  call mkvtk_phi(svall,nstep,dx,dy,dz,phi_all)
+  call mkvtk_phi(svall,nstep,time,dx,dy,dz,phi_all)
   !>debug
   !output phi
   write(*,'("phi value")')
@@ -401,7 +401,7 @@ if(ID.eq.0)then
   enddo
   write(*, *)
   enddo
-  call mkvtk_p(svall,nstep,dx,dy,dz,p_all)
+  call mkvtk_p(svall,nstep,time,dx,dy,dz,p_all)
   !call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   do l=1,nbub
   center(1)= xxc(l)
@@ -685,8 +685,8 @@ if(mod(nstep,imkvtk).eq.0)then
   !call mkvtk_phil(svall,nstep,dx,dy,dz,phil_all(-2,-2,-2,l),l)
   !enddo
 
-  call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
-  call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
+  call mkvtk_phi(svall,nstep,time,dx,dy,dz, phi_all)
+  call mkvtk_p(svall,nstep,time,dx,dy,dz,   p_all)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif
 endif
