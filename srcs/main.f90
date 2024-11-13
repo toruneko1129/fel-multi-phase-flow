@@ -78,7 +78,7 @@ real(8) :: center_pre1,center_pre2,velocity
 ! the number of grid points over the entire region
 !in Legendre case, use (8svn, svn, 2)
 !!!!
-nsv=8
+nsv=32
 
 svall(1)=nsv*8
 svall(2)=nsv
@@ -156,11 +156,11 @@ rmug=1.95d0
 surface_tension=5.5d0
 
 uwall = 0.0d0
-theta_deg = 90.0d0
+theta_deg = 80.0d0
 
 !calculation gravity 
 !!!!
-grv =9.81d0
+grv =0.0d0
 angle_deg=0.0d0
 angle_rad=angle_deg*pi/180.0d0
 grvb=grv*sin(angle_rad)
@@ -179,13 +179,13 @@ include'allocate.h'
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
 
-dyinv_array(-2)=2.0d0/dy
-dyinv_array(-1)=2.0d0/dy
-dyinv_array(0)=2.0d0/dy
-dyinv_array(1)=2.0d0/dy
-dyinv_array(svall(2)+1)=2.0d0/dy
-dyinv_array(svall(2)+2)=2.0d0/dy
-dyinv_array(svall(2)+3)=2.0d0/dy
+dyinv_array(-2)=1.0d0/dy
+dyinv_array(-1)=1.0d0/dy
+dyinv_array(0)=1.0d0/dy
+dyinv_array(1)=1.0d0/dy
+dyinv_array(svall(2)+1)=1.0d0/dy
+dyinv_array(svall(2)+2)=1.0d0/dy
+dyinv_array(svall(2)+3)=1.0d0/dy
 do i=2,svall(2)
 dyinv_array(i)=1.0d0/dy
 enddo
@@ -208,9 +208,9 @@ bet_mthinc=2.0d0
 !ccc
 
 nmax    =10000
-idout   =100000
-imkuvp  =100
-imkvtk  =imkuvp
+idout   =1000000
+imkuvp  =1000000
+imkvtk  =100
 imon_t  =100
 ibudget =imon_t
 
@@ -441,7 +441,10 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+!>tmp changed
+dt=1.0d-2
+time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
 write(*,'("time=",1e17.10," dt=",1e17.10)'), time, dt

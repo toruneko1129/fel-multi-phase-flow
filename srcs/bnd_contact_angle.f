@@ -26,9 +26,9 @@ ccc
 !$OMP$ SHARED(ni,nk,qk,cot_theta,dy)
       do k=-2,nk+3
       do i=-2,ni+3
-      qk(i, -2, k) = qk(i, 1, k) - 3 * dy * cot_theta
-      qk(i, -1, k) = qk(i, 1, k) - 2 * dy * cot_theta
-      qk(i,  0, k) = qk(i, 1, k) -     dy * cot_theta
+      qk(i, -2, k) = qk(i, 3, k) + 5 * dy * cot_theta
+      qk(i, -1, k) = qk(i, 2, k) + 3 * dy * cot_theta
+      qk(i,  0, k) = qk(i, 1, k) +     dy * cot_theta
       enddo
       enddo
 !$OMP  END PARALLEL DO
@@ -42,9 +42,9 @@ ccc
 !$OMP$ SHARED(ni,nj,nk,qk,cot_theta,dy)
       do k=-2,nk+3
       do i=-2,ni+3
-      qk(i, nj + 1, k) = qk(i, nj, k) +     dy * cot_theta
-      qk(i, nj + 2, k) = qk(i, nj, k) + 2 * dy * cot_theta
-      qk(i, nj + 3, k) = qk(i, nj, k) + 3 * dy * cot_theta
+      qk(i, nj + 1, k) = qk(i, nj    , k) +     dy * cot_theta
+      qk(i, nj + 2, k) = qk(i, nj - 1, k) + 3 * dy * cot_theta
+      qk(i, nj + 3, k) = qk(i, nj - 2, k) + 5 * dy * cot_theta
       enddo
       enddo
 !$OMP  END PARALLEL DO
