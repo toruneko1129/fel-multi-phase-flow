@@ -6,6 +6,7 @@ FC = mpifrtpx
 SRCDIR	=	./srcs
 FCSRCS =            \
 bnd_avzero.f			 \
+bnd_contact_angle.f \
 bnd_dirichlet.f                  \
 bnd_comm.f			 \
 bnd_neumann.f			 \
