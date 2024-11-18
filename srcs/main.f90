@@ -207,7 +207,7 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =100
+nmax    =10000
 idout   =100000
 imkuvp  =100000
 imkvtk  =100
@@ -419,10 +419,10 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-!dt=1.0d-2
-!time=time+dt
+dt=1.0d-2
+time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
 write(*,'("time=",1e17.10," dt=",1e17.10)'), time, dt
