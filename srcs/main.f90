@@ -78,7 +78,7 @@ real(8) :: center_pre1,center_pre2,velocity
 ! the number of grid points over the entire region
 !in Legendre case, use (8svn, svn, 2)
 !!!!
-nsv=32
+nsv=64
 
 svall(1)=nsv*8
 svall(2)=nsv
@@ -207,9 +207,9 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =10000
-idout   =1000000
-imkuvp  =1000000
+nmax    =100
+idout   =100000
+imkuvp  =100000
 imkvtk  =100
 imon_t  =100
 ibudget =imon_t
@@ -266,18 +266,6 @@ write(*,'("START")')
 
 !for tow phase flow, nbub must be 1
 call init_phi(ndiv, svall, phi, nbub, 1, nsv)
-
-
-!>debug
-!output phi
-write(*,'("phi value")')
-k = 0
-do j = -2, nj + 3
-do i = -2, ni + 3
-write(*, '(I0)', advance='no') int(phi(i, j, k, 1))
-enddo
-write(*, *)
-enddo
 
 
 do l=1,nbub
@@ -396,16 +384,6 @@ if(ID.eq.0)then
   !call mkvtk_phil(svall,nstep,dx,dy,dz,phil_all(-2,-2,-2,l),l)
   !enddo
   call mkvtk_phi(svall,nstep,dx,dy,dz,phi_all)
-  !>debug
-  !output phi
-  write(*,'("phi value")')
-  k = 0
-  do j = -2, nj + 3
-  do i = -2, ni + 3
-  write(*, '(I0)', advance='no') int(phi_all(i, j, k))
-  enddo
-  write(*, *)
-  enddo
   call mkvtk_p(svall,nstep,dx,dy,dz,p_all)
   !call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   do l=1,nbub
@@ -441,10 +419,10 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-dt=1.0d-2
-time=time+dt
+!dt=1.0d-2
+!time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
 write(*,'("time=",1e17.10," dt=",1e17.10)'), time, dt
@@ -697,6 +675,7 @@ if(mod(nstep,imkvtk).eq.0)then
 
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
+  call find_interface_positions(ni, nj, nk, phi_all, dx, dy)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif
 endif

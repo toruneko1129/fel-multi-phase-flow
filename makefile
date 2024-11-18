@@ -72,6 +72,7 @@ trans_w2r.f                      \
 
 F90SRCS =           \
 init_phi_legendre.f90 \
+find_interface_positions.f90 \
 main.f90            \
 
 SRCS	=	$(addprefix $(SRCDIR)/, $(F90SRCS)) \
