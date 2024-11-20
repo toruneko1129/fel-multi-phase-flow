@@ -6,7 +6,6 @@ FC = mpifrtpx
 SRCDIR	=	./srcs
 FCSRCS =            \
 bnd_avzero.f			 \
-bnd_contact_angle.f \
 bnd_dirichlet.f                  \
 bnd_comm.f			 \
 bnd_neumann.f			 \
@@ -71,6 +70,7 @@ trans_r2w.f			 \
 trans_w2r.f                      \
 
 F90SRCS =           \
+bnd_contact_angle_1120.f90 \
 init_phi_legendre.f90 \
 find_interface_positions.f90 \
 main.f90            \

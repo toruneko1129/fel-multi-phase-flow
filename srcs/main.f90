@@ -78,7 +78,7 @@ real(8) :: center_pre1,center_pre2,velocity
 ! the number of grid points over the entire region
 !in Legendre case, use (8svn, svn, 2)
 !!!!
-nsv=64
+nsv=256
 
 svall(1)=nsv*8
 svall(2)=nsv
@@ -207,11 +207,11 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =10000
-idout   =100000
-imkuvp  =100000
-imkvtk  =100
-imon_t  =100
+nmax    =80000
+idout   =1000000
+imkuvp  =1000000
+imkvtk  =800
+imon_t  =800
 ibudget =imon_t
 
 time=0.0d0
@@ -421,7 +421,7 @@ endif
 
 !call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-dt=1.0d-2
+dt=0.125d-2
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
