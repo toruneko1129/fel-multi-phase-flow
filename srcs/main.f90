@@ -21,7 +21,7 @@ parameter (nbub=1)              !change
 real(8) :: xxc(nbub),yyc(nbub),zzc(nbub)
 
 real(8) :: pi,cfl,time,dt,xl,yl,zl,dx,dy,dz,dxinv,dyinv,dzinv
-real(8) :: surface_tension,rhol,rhog,rmul,rmug,grv,grvb,grvp,angle_deg,angle_rad,uwall,theta_deg
+real(8) :: surface_tension,rhol,rhog,rmul,rmug,grv,grvb,grvp,angle_deg,angle_rad,uwall,l1,theta_deg
 real(8) :: bet_mthinc
 real(8) :: particle_radius,particle_init_x,particle_init_y,particle_init_z
 integer nmax,idout,imkuvp,imkvtk,ibudget,imon_t,nstep,nstep0
@@ -156,6 +156,7 @@ rmug=1.95d0
 surface_tension=5.5d0
 
 uwall = 0.0d0
+l1 = 1.625d0
 theta_deg = 90.0d0
 
 !calculation gravity 
@@ -281,9 +282,9 @@ call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
 call summation(ni,nj,nk,phi,nbub)
 
-call bndu(nID,ni,nj,nk,u ,v ,w ,uwall)
-call bndu(nID,ni,nj,nk,uo,vo,wo,uwall)
-call bndu(nID,ni,nj,nk,un,vn,wn,uwall)
+call bndu(nID,ni,nj,nk,u ,v ,w ,uwall,yl,dy,l1)
+call bndu(nID,ni,nj,nk,uo,vo,wo,uwall,yl,dy,l1)
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall,yl,dy,l1)
 call bnd_periodic(ni,nj,nk,u )
 call bnd_periodic(ni,nj,nk,v )
 call bnd_periodic(ni,nj,nk,w )
@@ -321,8 +322,8 @@ nstep=0
 if(irestart.eq.1)then
   write(*,'("RESTART")')
   call datain(ipara,ID,ni,nj,nk,nbub,nstep,time,u,v,w,p,uo,vo,wo,po,phi)
-  call bndu(nID,ni,nj,nk,u ,v ,w ,uwall)
-  call bndu(nID,ni,nj,nk,uo,vo,wo,uwall)
+  call bndu(nID,ni,nj,nk,u ,v ,w ,uwall,yl,dy,l1)
+  call bndu(nID,ni,nj,nk,uo,vo,wo,uwall,yl,dy,l1)
   call bnd_periodic(ni,nj,nk,u )
   call bnd_periodic(ni,nj,nk,v )
   call bnd_periodic(ni,nj,nk,w )
@@ -559,9 +560,9 @@ call solu_sor4(ipara,ID,nID,ndiv,ni,nj,nk,key,sendjb,recvjb &
   , aw_b_w, aw_t_w, aw_p_w         &
   ,au_bw_w,au_tw_w,au_be_w,au_te_w &
   ,av_bs_w,av_ts_w,av_bn_w,av_tn_w &
-  ,src_u,src_v,src_w,un,vn,wn,uwall)
+  ,src_u,src_v,src_w,un,vn,wn,uwall,yl,dy,l1)
 
-call bndu(nID,ni,nj,nk,un,vn,wn,uwall)
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall,yl,dy,l1)
 call bnd_periodic(ni,nj,nk,un)
 call bnd_periodic(ni,nj,nk,vn)
 call bnd_periodic(ni,nj,nk,wn)
@@ -586,7 +587,7 @@ call solp_fft_tdma4(ipara,ID,ndiv,ni,nj,nk,nstep,imon_t,rhog,dxinv,dyinv,dzinv,d
 
 call corunp_explicit(nID,ni,nj,nk,rhog,dxinv,dyinv,dzinv,dt,dp,phat,un,vn,wn,pn)
 
-call bndu(nID,ni,nj,nk,un,vn,wn,uwall)
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall,yl,dy,l1)
 call bnd_periodic(ni,nj,nk,un)
 call bnd_periodic(ni,nj,nk,vn)
 call bnd_periodic(ni,nj,nk,wn)
