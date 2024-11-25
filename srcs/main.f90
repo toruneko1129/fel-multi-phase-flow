@@ -3,6 +3,9 @@ implicit none
 include 'mpif.h'
 include 'param.h'
 
+!nsv: number of mesh
+!svall: use svn to determine mesh resolution
+integer :: nsv
 integer :: svall(3)
 integer :: ierr,ndiv,ID,ipara
 integer :: nID(6)
@@ -14,11 +17,11 @@ real(8),dimension(:),allocatable :: dyinv_array
 integer irestart
 integer ni,nj,nk
 integer nbub
-parameter (nbub=0)              !change 
+parameter (nbub=1)              !change 
 real(8) :: xxc(nbub),yyc(nbub),zzc(nbub)
 
 real(8) :: pi,cfl,time,dt,xl,yl,zl,dx,dy,dz,dxinv,dyinv,dzinv
-real(8) :: surface_tension,rhol,rhog,rmul,rmug,grv,grvb,grvp,angle_deg,angle_rad,uwall
+real(8) :: surface_tension,rhol,rhog,rmul,rmug,grv,grvb,grvp,angle_deg,angle_rad,uwall,theta_deg
 real(8) :: bet_mthinc
 real(8) :: particle_radius,particle_init_x,particle_init_y,particle_init_z
 integer nmax,idout,imkuvp,imkvtk,ibudget,imon_t,nstep,nstep0
@@ -73,9 +76,12 @@ real(8) :: rho_av,rhon_av
 real(8) :: center_pre1,center_pre2,velocity
 
 ! the number of grid points over the entire region
+!in Legendre case, use (8svn, svn, 2)
 !!!!
-svall(1)=32
-svall(2)=8
+nsv=32
+
+svall(1)=nsv*8
+svall(2)=nsv
 svall(3)=2
 
 ! irestart=1 if computation will be restarted (input data are needed).
@@ -136,9 +142,10 @@ pi=atan(1.0d0)*4.0d0
 ! ni, nj, nk: the numbers of grid points
 ! dx, dy, dz: grid widths
 ! uwall: wall velocity
+! theta_deg: contact angle at the wall[deg]
 
 !!!!
-xl=6.8d1  
+xl=1.36d2
 yl=1.36d1
 zl=4.25
 
@@ -148,11 +155,12 @@ rmul=1.95d0
 rmug=1.95d0
 surface_tension=5.5d0
 
-uwall = 0.25d0
+uwall = 0.0d0
+theta_deg = 90.0d0
 
 !calculation gravity 
 !!!!
-grv =9.81d0
+grv =0.0d0
 angle_deg=0.0d0
 angle_rad=angle_deg*pi/180.0d0
 grvb=grv*sin(angle_rad)
@@ -171,13 +179,13 @@ include'allocate.h'
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
 
-dyinv_array(-2)=2.0d0/dy
-dyinv_array(-1)=2.0d0/dy
-dyinv_array(0)=2.0d0/dy
-dyinv_array(1)=2.0d0/dy
-dyinv_array(svall(2)+1)=2.0d0/dy
-dyinv_array(svall(2)+2)=2.0d0/dy
-dyinv_array(svall(2)+3)=2.0d0/dy
+dyinv_array(-2)=1.0d0/dy
+dyinv_array(-1)=1.0d0/dy
+dyinv_array(0)=1.0d0/dy
+dyinv_array(1)=1.0d0/dy
+dyinv_array(svall(2)+1)=1.0d0/dy
+dyinv_array(svall(2)+2)=1.0d0/dy
+dyinv_array(svall(2)+3)=1.0d0/dy
 do i=2,svall(2)
 dyinv_array(i)=1.0d0/dy
 enddo
@@ -200,10 +208,10 @@ bet_mthinc=2.0d0
 !ccc
 
 nmax    =10000
-idout   =100000
-imkuvp  =100000
-imkvtk  =imkuvp
-imon_t  =20
+idout   =1000000
+imkuvp  =1000000
+imkvtk  =100
+imon_t  =100
 ibudget =imon_t
 
 time=0.0d0
@@ -256,9 +264,15 @@ endif
 if(irestart.eq.0)then
 write(*,'("START")')
 
+!for tow phase flow, nbub must be 1
+call init_phi(ndiv, svall, phi, nbub, 1, nsv)
+
+
 do l=1,nbub
+!>contact angle condition
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
-call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
+call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,l),theta_deg,dy)
+!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi(-2,-2,-2,l))
 enddo
@@ -289,8 +303,10 @@ call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,un)
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,vn)
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,wn)
 
+!>contact angle condition
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,0))
-call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
+call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,0),theta_deg,dy)
+!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,0))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi(-2,-2,-2,0))
 
@@ -323,8 +339,10 @@ if(irestart.eq.1)then
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,vo)
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,wo)
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,po)
+  !>contact angle condition
   !call bnd_neumann(nID,ni,nj,nk,phi )
-  call bnd_dirichlet(nID,ni,nj,nk,phi)
+  call bnd_contact_angle(nID,ni,nj,nk,phi,theta_deg,dy)
+  !call bnd_dirichlet(nID,ni,nj,nk,phi)
   call bnd_periodic(ni,nj,nk,phi )
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi )
 endif
@@ -392,7 +410,6 @@ endif
 call cal_coef_prs(svall(2),rhog,dxinv,dyinv,dzinv,aw_p,ae_p,as_p,an_p,ab_p,at_p,ap_p)
 call cal_coef_solp_fft(svall(2),as_p,an_p,as_p_fft,an_p_fft,ap_p_fft)
 
-
 !ccc
 !ccc<main routine
 !ccc
@@ -402,11 +419,11 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-!local change need to fix
 !call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
-!call mpi_barrier(mpi_comm_world,ierr)
-dt = 0.5d-1
-time = time + dt
+!>tmp changed
+dt=1.0d-2
+time=time+dt
+call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
 write(*,'("time=",1e17.10," dt=",1e17.10)'), time, dt
 endif
@@ -419,8 +436,10 @@ call solphi_mthinc1(ni,nj,nk,dxinv,dyinv,dzinv,dt,bet_mthinc,phi(-2,-2,-2,l),phi
 call solphi_mthinc2(ni,nj,nk,dxinv,dyinv,dzinv,dt,u,v,w,flphix,flphiy,flphiz,phi(-2,-2,-2,l),phin(-2,-2,-2,l))
 call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phin(-2,-2,-2,l),phix,phiy,phiz)
 call solphi_mthinc3(ipara,ni,nj,nk,dxinv,dyinv,dzinv,bet_mthinc,phix,phiy,phiz,phi(-2,-2,-2,l),phin(-2,-2,-2,l))
+!>contact angle condition
 !call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
-call bnd_dirichlet(nID,ni,nj,nk,phin(-2,-2,-2,l))
+call bnd_contact_angle(nID,ni,nj,nk,phin(-2,-2,-2,l),theta_deg,dy)
+!call bnd_dirichlet(nID,ni,nj,nk,phin(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,l))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,l))
 enddo
@@ -429,8 +448,10 @@ call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
 
 call summation(ni,nj,nk,phin,nbub)
-!call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,0))
-call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,0))
+!>contact angle condition
+call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,0))
+call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,0),theta_deg,dy)
+!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,0))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,0))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,0))
 
@@ -617,17 +638,6 @@ enddo
 call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
 
-
-!ccc
-!ccc<output data
-!ccc
-if(mod(nstep,imon_t).eq.0)then                                               
-  write(*, *) 'velocity u'
-  do j = 1, nj
-  write(*,'("y= ", F10.5, " u= ", E20.10)') dy*(j-0.5d0), u(ni/2, j, 1)
-  enddo
-endif
-
 if(mod(nstep,idout).eq.0)then                                               
   call dataou(ipara,ID,ni,nj,nk,nbub,nstep,time,u,v,w,p,uo,vo,wo,po,phi)
 endif
@@ -665,6 +675,7 @@ if(mod(nstep,imkvtk).eq.0)then
 
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
+  call find_interface_positions(ni, nj, nk, phi_all, dx, dy)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif
 endif

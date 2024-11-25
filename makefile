@@ -45,7 +45,6 @@ datain.f			 \
 dataou.f			 \
 fourn.f                          \
 init.f				 \
-init_phi.f			 \
 init_q.f                         \
 mk_all.f			 \
 mk_center.f                      \
@@ -71,6 +70,9 @@ trans_r2w.f			 \
 trans_w2r.f                      \
 
 F90SRCS =           \
+bnd_contact_angle.f90 \
+init_phi_legendre.f90 \
+find_interface_positions.f90 \
 main.f90            \
 
 SRCS	=	$(addprefix $(SRCDIR)/, $(F90SRCS)) \
