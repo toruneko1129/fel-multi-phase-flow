@@ -63,7 +63,7 @@
       write(10,"('ASPECT_RATIO ',e11.4,' ',e11.4,' ',e11.4)")dx,dy,dz
       write(10,"('')")
       write(10,"('POINT_DATA ',I0)")(mi+1)*(mj+1)*(mk+1)
-      write(10,"('SCALARS p float')")
+      write(10,"('SCALARS phi float')")
       write(10,"('LOOKUP_TABLE default')")
       do k=0,mk
       do j=0,mj
