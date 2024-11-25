@@ -14,7 +14,7 @@
      & , aw_b_w, aw_t_w, aw_p_w
      & ,au_bw_w,au_tw_w,au_be_w,au_te_w
      & ,av_bs_w,av_ts_w,av_bn_w,av_tn_w
-     & ,src_u,src_v,src_w,un,vn,wn,uwall,yl,dy,l1)
+     & ,src_u,src_v,src_w,un,vn,wn,uwall,dy,l1)
 
       implicit none
       include 'mpif.h'
@@ -79,7 +79,7 @@
       real*8      un(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8      vn(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8      wn(-2:ni+3,-2:nj+3,-2:nk+3)
-      real*8 uwall,yl,dy,l1
+      real*8 uwall,dy,l1
 
       integer ierr
       real*8 sendbuf(1),recvbuf(1)
@@ -171,7 +171,7 @@ cc
       enddo
 !$OMP  END PARALLEL DO
       if(mod(lsor4,2).eq.0)then
-      call bndu(nID,ni,nj,nk,un,vn,wn,uwall,yl,dy,l1)
+      call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1)
       call bnd_periodic(ni,nj,nk,un)
       call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,un)
       endif
@@ -221,7 +221,7 @@ cc
       enddo
 !$OMP  END PARALLEL DO
       if(mod(lsor4,2).eq.0)then
-      call bndu(nID,ni,nj,nk,un,vn,wn,uwall,yl,dy,l1)
+      call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1)
       call bnd_periodic(ni,nj,nk,vn)
       call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,vn)
       endif
@@ -271,7 +271,7 @@ cc
       enddo
 !$OMP  END PARALLEL DO
       if(mod(lsor4,2).eq.0)then
-      call bndu(nID,ni,nj,nk,un,vn,wn,uwall,yl,dy,l1)
+      call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1)
       call bnd_periodic(ni,nj,nk,wn)
       call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,wn)
       endif
