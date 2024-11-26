@@ -1,19 +1,19 @@
 !<impose the contact angle boundary condition on qk
-!<give the static contact angle theta_deg and grid space dx, dy
-subroutine bnd_contact_angle(nID, ni, nj, nk, qk, theta_deg, dx, dy)
+!<give the static contact angle theta_0 and grid space dx, dy
+subroutine bnd_contact_angle(nID, ni, nj, nk, qk, theta_0, dx, dy)
     
   implicit none
   include 'param.h'
   integer nID(6), ni, nj, nk
   real*8 qk(-2:ni+3,-2:nj+3,-2:nk+3)
-  real*8 theta_deg, dx, dy
+  real*8 theta_0, dx, dy
 
   integer i, k
   real*8 theta_rad, cos_theta, sin_theta, eps, aspect
   real*8 nq_x, nq_y, nq_z, norm
 
   ! 角度をラジアンに変換
-  theta_rad = theta_deg * (acos(-1.0d0) / 180.0d0)
+  theta_rad = theta_0 * (acos(-1.0d0) / 180.0d0)
   cos_theta = cos(theta_rad)
   sin_theta = sin(theta_rad)
   eps = 1.0d-20
