@@ -1,5 +1,7 @@
 ccc
 ccc<impose boundary conditions on the velocity components uk,vk,wk
+ccc<localised naier slip
+ccc<l1, l2: slip length of fluid[1,2]
 ccc
       subroutine bndu(nID,ni,nj,nk,uk,vk,wk,uwall,dy,l1,l2,phi)
 

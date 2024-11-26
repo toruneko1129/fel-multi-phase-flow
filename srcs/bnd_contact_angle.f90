@@ -1,12 +1,12 @@
 !<impose the contact angle boundary condition on qk
-!<give the contact angle theta_deg and grid space dy
-subroutine bnd_contact_angle(nID, ni, nj, nk, qk, theta_deg, dy)
+!<give the static contact angle theta_deg and grid space dx, dy
+subroutine bnd_contact_angle(nID, ni, nj, nk, qk, theta_deg, dx, dy)
     
   implicit none
   include 'param.h'
   integer nID(6), ni, nj, nk
   real*8 qk(-2:ni+3,-2:nj+3,-2:nk+3)
-  real*8 theta_deg, dy
+  real*8 theta_deg, dx, dy
 
   integer i, k
   real*8 theta_rad, cos_theta, sin_theta, eps, aspect
@@ -17,7 +17,7 @@ subroutine bnd_contact_angle(nID, ni, nj, nk, qk, theta_deg, dy)
   cos_theta = cos(theta_rad)
   sin_theta = sin(theta_rad)
   eps = 1.0d-20
-  aspect = 0.8d0
+  aspect = dy / dx
 
   if(nID(Y_MINUS).lt.0)then
 !$OMP  PARALLEL DO PRIVATE(i,k,nq_x,nq_y,nq_z,norm) &
