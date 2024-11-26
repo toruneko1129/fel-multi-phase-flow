@@ -155,10 +155,10 @@ rmul=1.95d0
 rmug=1.95d0
 surface_tension=5.5d0
 
-uwall = 0.25d0
-l1 = 1.625d0
-l2 = 1.625d0
-theta_deg = 90.0d0
+uwall = 0.2d0
+l1 = 0.60d0
+l2 = 1.36d0
+theta_deg = 64.0d0
 
 !calculation gravity 
 !!!!
@@ -287,9 +287,9 @@ call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
 call summation(ni,nj,nk,phi,nbub)
 
-call bndu(nID,ni,nj,nk,u ,v ,w ,uwall,dy,l1)
-call bndu(nID,ni,nj,nk,uo,vo,wo,uwall,dy,l1)
-call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1)
+call bndu(nID,ni,nj,nk,u ,v ,w ,uwall,dy,l1,l2,phi(-2,-2,-2,l))
+call bndu(nID,ni,nj,nk,uo,vo,wo,uwall,dy,l1,l2,phi(-2,-2,-2,l))
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1,l2,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,u )
 call bnd_periodic(ni,nj,nk,v )
 call bnd_periodic(ni,nj,nk,w )
@@ -327,8 +327,8 @@ nstep=0
 if(irestart.eq.1)then
   write(*,'("RESTART")')
   call datain(ipara,ID,ni,nj,nk,nbub,nstep,time,u,v,w,p,uo,vo,wo,po,phi)
-  call bndu(nID,ni,nj,nk,u ,v ,w ,uwall,dy,l1)
-  call bndu(nID,ni,nj,nk,uo,vo,wo,uwall,dy,l1)
+  call bndu(nID,ni,nj,nk,u ,v ,w ,uwall,dy,l1,l2,phi(-2,-2,-2,l))
+  call bndu(nID,ni,nj,nk,uo,vo,wo,uwall,dy,l1,l2,phi(-2,-2,-2,l))
   call bnd_periodic(ni,nj,nk,u )
   call bnd_periodic(ni,nj,nk,v )
   call bnd_periodic(ni,nj,nk,w )
@@ -565,9 +565,9 @@ call solu_sor4(ipara,ID,nID,ndiv,ni,nj,nk,key,sendjb,recvjb &
   , aw_b_w, aw_t_w, aw_p_w         &
   ,au_bw_w,au_tw_w,au_be_w,au_te_w &
   ,av_bs_w,av_ts_w,av_bn_w,av_tn_w &
-  ,src_u,src_v,src_w,un,vn,wn,uwall,dy,l1)
+  ,src_u,src_v,src_w,un,vn,wn,uwall,dy,l1,l2,phi(-2,-2,-2,l))
 
-call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1)
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1,l2,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,un)
 call bnd_periodic(ni,nj,nk,vn)
 call bnd_periodic(ni,nj,nk,wn)
@@ -592,7 +592,7 @@ call solp_fft_tdma4(ipara,ID,ndiv,ni,nj,nk,nstep,imon_t,rhog,dxinv,dyinv,dzinv,d
 
 call corunp_explicit(nID,ni,nj,nk,rhog,dxinv,dyinv,dzinv,dt,dp,phat,un,vn,wn,pn)
 
-call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1)
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1,l2,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,un)
 call bnd_periodic(ni,nj,nk,vn)
 call bnd_periodic(ni,nj,nk,wn)
