@@ -71,6 +71,7 @@ trans_w2r.f                      \
 
 F90SRCS =           \
 bnd_contact_angle.f90 \
+gnbc.f90 \
 init_phi_legendre.f90 \
 find_interface_positions.f90 \
 main.f90            \
