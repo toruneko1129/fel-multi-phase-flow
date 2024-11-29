@@ -78,7 +78,7 @@ real(8) :: rho_av,rhon_av
 real(8) :: center_pre1,center_pre2,velocity
 
 ! the number of grid points over the entire region
-!in Legendre case, use (8svn, svn, 2)
+! in Legendre case, use (8svn, svn, 2)
 !!!!
 nsv=64
 
@@ -161,7 +161,7 @@ uwall = 0.2d0
 l1 = 1.625d0
 l2 = 3.67d0
 theta_0 = 64.0d0
-zeta = 5.5d0
+zeta = 0.0d0
 
 !calculation gravity 
 !!!!
