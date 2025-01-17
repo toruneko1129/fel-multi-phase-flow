@@ -161,7 +161,7 @@ uwall = 0.2d0
 l1 = 1.625d0
 l2 = 3.67d0
 theta_0 = 64.0d0
-zeta = 0.0d0
+zeta = 4.5d0
 
 !calculation gravity 
 !!!!
@@ -213,7 +213,7 @@ bet_mthinc=2.0d0
 !ccc
 
 nmax    =12000*nsv/32
-idout   =1000000
+idout   =1200000
 imkuvp  =1000000
 imkvtk  =nmax/120
 imon_t  =nmax/120
