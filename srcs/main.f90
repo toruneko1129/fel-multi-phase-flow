@@ -24,7 +24,7 @@ real(8) :: pi,cfl,time,dt,xl,yl,zl,dx,dy,dz,dxinv,dyinv,dzinv
 real(8) :: surface_tension,rhol,rhog,rmul,rmug,grv,grvb,grvp,angle_deg,angle_rad,uwall,l1,l2,theta_0,zeta
 real(8) :: bet_mthinc
 real(8) :: particle_radius,particle_init_x,particle_init_y,particle_init_z
-integer nmax,idout,imkuvp,imkvtk,ibudget,imon_t,nstep,nstep0
+integer nmax,idout,imkuvp,imkvtk,ibudget,imon_t,nstep,nstep0,tscale
 
 real(8),dimension(:,:,:),allocatable :: u,v,w,uo,vo,wo,un,vn,wn,p,po,pn,phat,dp,div
 real(8),dimension(:,:,:),allocatable :: rho,rmu,rhon,rmun
@@ -80,7 +80,7 @@ real(8) :: center_pre1,center_pre2,velocity
 ! the number of grid points over the entire region
 ! in Legendre case, use (8svn, svn, 2)
 !!!!
-nsv=64
+nsv=128
 
 svall(1)=nsv*8
 svall(2)=nsv
@@ -157,11 +157,11 @@ rmul=1.95d0
 rmug=1.95d0
 surface_tension=5.5d0
 
-uwall = 0.2d0
-l1 = 1.625d0
-l2 = 3.67d0
-theta_0 = 64.0d0
-zeta = 4.5d0
+uwall = 0.25d0
+l1 = 2.165d0
+l2 = l1
+theta_0 = 90.0d0
+zeta = 0.21d0 * 6.0d0 * (rmul / l1 + rmug / l2)
 
 !calculation gravity 
 !!!!
@@ -212,7 +212,8 @@ bet_mthinc=2.0d0
 !ccc ibudget interval for writing budgets
 !ccc
 
-nmax    =12000*nsv/32
+tscale  =1.0d0
+nmax    =12000*nsv/32/tscale
 idout   =1200000
 imkuvp  =1000000
 imkvtk  =nmax/120
@@ -434,7 +435,7 @@ endif
 
 !call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-dt=32.0d-2/nsv
+dt=32.0d-2/nsv*tscale
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
