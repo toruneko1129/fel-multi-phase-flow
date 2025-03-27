@@ -7,3 +7,4 @@ a.out
 #results file
 results/*
 !results/.gitkeep
+optim_guzai/*
