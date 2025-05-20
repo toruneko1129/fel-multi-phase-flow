@@ -4,7 +4,7 @@
 #PJM --mpi proc=1
 #PJM --omp thread=16
 #PJM -L elapse=48:00:00
-#PJM -g gd22
+#PJM -g gn38
 #PJM -j
 
 mpiexec ./a.out
