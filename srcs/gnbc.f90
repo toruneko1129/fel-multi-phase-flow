@@ -21,9 +21,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, uwall, theta_0_array, &
       do i=-2,ni+3
         u_cl = (uk(mod(i+ni+2,ni+3), 0, k) + uk(mod(i+ni+2,ni+3), 1, k) + &
                  uk(i, 0, k) + uk(i, 1, k)) / 4.0d0 + uwall
-        !if (i <= ni/2) then
-        !  u_cl = -u_cl
-        !endif
+        
         theta_0_rad = theta_0_array(i, 1, k) * (acos(-1.0d0) / 180.0d0)
         cos_theta_0 = cos(theta_0_rad)
         cos_theta_t = cos_theta_0 - zeta_array(i, 1, k) * u_cl / surface_tension
@@ -42,9 +40,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, uwall, theta_0_array, &
       do i=-2,ni+3
         u_cl = (uk(mod(i+ni+2,ni+3), nj, k) + uk(mod(i+ni+2,ni+3), nj+1, k) + &
                  uk(i, nj, k) + uk(i, nj+1, k)) / 4.0d0 - uwall
-        !if (i <= ni/2) then
-        !  u_cl = -u_cl
-        !endif
+        
         theta_0_rad = theta_0_array(i, nj, k) * (acos(-1.0d0) / 180.0d0)
         cos_theta_0 = cos(theta_0_rad)
         cos_theta_t = cos_theta_0 - zeta_array(i, nj, k) * u_cl / surface_tension

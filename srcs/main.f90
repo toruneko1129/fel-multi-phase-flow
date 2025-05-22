@@ -21,7 +21,9 @@ parameter (nbub=1)              !change
 real(8) :: xxc(nbub),yyc(nbub),zzc(nbub)
 
 real(8) :: pi,cfl,time,dt,xl,yl,zl,dx,dy,dz,dxinv,dyinv,dzinv
-real(8) :: surface_tension,rhol,rhog,rmul,rmug,grv,grvb,grvp,angle_deg,angle_rad,uwall,l1,l2,theta_0,zeta
+real(8) :: surface_tension,rhol,rhog,rmul,rmug,grv,grvb,grvp,angle_deg,angle_rad,uwall
+real(8) :: l1_a,l2_a,theta_0_a,zeta_a
+real(8) :: l1_b,l2_b,theta_0_b,zeta_b
 real(8) :: bet_mthinc
 real(8) :: particle_radius,particle_init_x,particle_init_y,particle_init_z
 integer nmax,idout,imkuvp,imkvtk,ibudget,imon_t,nstep,nstep0,tscale
@@ -162,10 +164,15 @@ rmug=1.95d0
 surface_tension=5.5d0
 
 uwall = 0.25d0
-l1 = 2.165d0
-l2 = l1
-theta_0 = 90.0d0
-zeta = 0.21d0 * 6.0d0 * (rmul / l1 + rmug / l2)
+l1_a = 2.165d0
+l2_a = l1_a
+theta_0_a = 90.0d0
+zeta_a = 0.21d0 * 6.0d0 * (rmul / l1_a + rmug / l2_a)
+
+l1_b = 1.087d0
+l2_b = l1_b * 3.67d0/1.625d0
+theta_0_b = 64.0d0
+zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
 
 !calculation gravity 
 !!!!
@@ -186,13 +193,10 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array(ni,nj,nk,theta_0,theta_0_array)
-call init_array(ni,nj,nk,l1,l1_array)
-call init_array(ni,nj,nk,l2,l2_array)
-call init_array(ni,nj,nk,zeta,zeta_array)
-print *, l1_array(1, 1, 1)
-print *, l2_array(1, 1, 1)
-print *, zeta_array(1, 1, 1)
+call init_array(ni,nj,nk,theta_0_a,theta_0_b,theta_0_array)
+call init_array(ni,nj,nk,l1_a,l1_b,l1_array)
+call init_array(ni,nj,nk,l2_a,l2_b,l2_array)
+call init_array(ni,nj,nk,zeta_a,zeta_b,zeta_array)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -257,10 +261,14 @@ write(*,'("rmug                ",20e20.10)')rmug
 write(*,'("grv                 ",20e20.10)')grv
 write(*,'("bet_mthinc          ",20e20.10)')bet_mthinc
 write(*,'("uwall               ",20e20.10)')uwall
-write(*,'("l1                  ",20e20.10)')l1
-write(*,'("l2                  ",20e20.10)')l2
-write(*,'("theta_0             ",20e20.10)')theta_0
-write(*,'("zeta                ",20e20.10)')zeta
+write(*,'("l1_a                ",20e20.10)')l1_a
+write(*,'("l2_a                ",20e20.10)')l2_a
+write(*,'("theta_0_a           ",20e20.10)')theta_0_a
+write(*,'("zeta_a              ",20e20.10)')zeta_a
+write(*,'("l1_b                ",20e20.10)')l1_b
+write(*,'("l2_b                ",20e20.10)')l2_b
+write(*,'("theta_0_b           ",20e20.10)')theta_0_b
+write(*,'("zeta_b              ",20e20.10)')zeta_b
 write(*,*)
 write(*,'("nmax                ",1i9)')nmax
 write(*,'("idout               ",1i9)')idout
