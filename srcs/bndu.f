@@ -12,7 +12,9 @@ ccc
       real*8    uk(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    vk(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    wk(-2:ni+3,-2:nj+3,-2:nk+3)
-      real*8    uwall,dy,l1,l2
+      real*8    uwall,dy
+      real*8    l1(-2:ni+3,-2:nj+3,-2:nk+3)
+      real*8    l2(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    phi(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    phi_av, ls, coef1, coef2
 
@@ -34,7 +36,7 @@ ccc
       do k=-2,nk+3
       do i=-2,ni+3
       phi_av = (phi(i,1,k) + phi(mod(i+1,ni+3),1,k))/2.0d0
-      ls = l2 + (l2-l1)*phi_av
+      ls = l2(i,1,k) + (l2(i,1,k)-l1(i,1,k))*phi_av
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
@@ -66,7 +68,7 @@ ccc
       do k=-2,nk+3
       do i=-2,ni+3
       phi_av = (phi(i,nj,k) + phi(mod(i+1,ni+3),nj,k))/2.0d0
-      ls = l2 + (l2-l1)*phi_av
+      ls = l2(i,nj,k) + (l2(i,nj,k)-l1(i,nj,k))*phi_av
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
