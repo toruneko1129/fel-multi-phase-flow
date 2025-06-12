@@ -69,6 +69,7 @@ real(8),dimension(:,:,:),allocatable :: l1_array
 real(8),dimension(:,:,:),allocatable :: l2_array
 real(8),dimension(:,:,:),allocatable :: zeta_array
 real(8),dimension(:,:,:),allocatable :: theta_array
+integer width
 
 real(8),dimension(:,:,:),allocatable :: vorx,q
 real(8),dimension(:,:,:),allocatable :: phi_all,q_all,vorx_all,wrk_all,p_all
@@ -86,7 +87,7 @@ real(8) :: center_pre1,center_pre2,velocity
 ! the number of grid points over the entire region
 ! in Legendre case, use (8svn, svn, 2)
 !!!!
-nsv=64
+nsv=128
 
 svall(1)=nsv*8
 svall(2)=nsv
@@ -174,6 +175,9 @@ l2_b = l1_b * 3.67d0/1.625d0
 theta_0_b = 64.0d0
 zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
 
+!pattern width
+width = 8
+
 !calculation gravity 
 !!!!
 grv =0.0d0
@@ -193,10 +197,10 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array(ni,nj,nk,theta_0_a,theta_0_b,theta_0_array)
-call init_array(ni,nj,nk,l1_a,l1_b,l1_array)
-call init_array(ni,nj,nk,l2_a,l2_b,l2_array)
-call init_array(ni,nj,nk,zeta_a,zeta_b,zeta_array)
+call init_array(ni,nj,nk,theta_0_a,theta_0_b,theta_0_array,width)
+call init_array(ni,nj,nk,l1_a,l1_b,l1_array,width)
+call init_array(ni,nj,nk,l2_a,l2_b,l2_array,width)
+call init_array(ni,nj,nk,zeta_a,zeta_b,zeta_array,width)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -269,6 +273,7 @@ write(*,'("l1_b                ",20e20.10)')l1_b
 write(*,'("l2_b                ",20e20.10)')l2_b
 write(*,'("theta_0_b           ",20e20.10)')theta_0_b
 write(*,'("zeta_b              ",20e20.10)')zeta_b
+write(*,'("pattern width       ",1i9)')width
 write(*,*)
 write(*,'("nmax                ",1i9)')nmax
 write(*,'("idout               ",1i9)')idout
