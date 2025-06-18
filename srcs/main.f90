@@ -177,7 +177,7 @@ zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
 
 !pattern width
 period = 8
-ratio_a = 2
+ratio_a = 7
 
 !calculation gravity 
 !!!!
@@ -235,8 +235,7 @@ bet_mthinc=2.0d0
 !ccc
 
 tscale  =1.0d0
-!nmax    =12000*nsv/32/tscale
-nmax=0
+nmax    =12000*nsv/32/tscale
 idout   =1200000
 imkuvp  =1000000
 imkvtk  =nmax/120

@@ -27,9 +27,9 @@ subroutine init_array_pt_ratio(ni,nj,nk,q_a,q_b,q_array,period,ratio_a)
       else
         q_array(i, nj, k) = q_b
       endif
-      if ((k == 0) .AND. (0 < i) .AND. (i <= 16) ) then
-        write(*,'(20e20.10)') q_array(i,nj,k)
-      end if
+      !if ((k == 0) .AND. (0 < i) .AND. (i <= 16) ) then
+      !  write(*,'(20e20.10)') q_array(i,nj,k)
+      !end if
     end do
   end do
   !$OMP END PARALLEL DO
