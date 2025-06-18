@@ -197,10 +197,10 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array(ni,nj,nk,theta_0_a,theta_0_b,theta_0_array,width)
-call init_array(ni,nj,nk,l1_a,l1_b,l1_array,width)
-call init_array(ni,nj,nk,l2_a,l2_b,l2_array,width)
-call init_array(ni,nj,nk,zeta_a,zeta_b,zeta_array,width)
+call init_array_pt_same(ni,nj,nk,theta_0_a,theta_0_b,theta_0_array,width)
+call init_array_pt_same(ni,nj,nk,l1_a,l1_b,l1_array,width)
+call init_array_pt_same(ni,nj,nk,l2_a,l2_b,l2_array,width)
+call init_array_pt_same(ni,nj,nk,zeta_a,zeta_b,zeta_array,width)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -234,7 +234,8 @@ bet_mthinc=2.0d0
 !ccc
 
 tscale  =1.0d0
-nmax    =12000*nsv/32/tscale
+!nmax    =12000*nsv/32/tscale
+nmax=0
 idout   =1200000
 imkuvp  =1000000
 imkvtk  =nmax/120
