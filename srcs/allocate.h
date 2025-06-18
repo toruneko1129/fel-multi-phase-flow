@@ -158,6 +158,10 @@ allocate(phir_i(-svall(1)/2:svall(1)/2-1,svall(2)/ndiv,-svall(3)/2:svall(3)/2-1)
 allocate(phiw_r(-svall(1)/2:svall(1)/2-1,svall(2)     , svall(3)/ndiv          ))
 allocate(phiw_i(-svall(1)/2:svall(1)/2-1,svall(2)     , svall(3)/ndiv          ))
 
+allocate(theta_0_array(-2:ni+3,-2:nj+3,-2:nk+3))
+allocate(l1_array(-2:ni+3,-2:nj+3,-2:nk+3))
+allocate(l2_array(-2:ni+3,-2:nj+3,-2:nk+3))
+allocate(zeta_array(-2:ni+3,-2:nj+3,-2:nk+3))
 allocate(theta_array(-2:ni+3,-2:nj+3,-2:nk+3))
 
 allocate(vorx(-2:ni+3,-2:nj+3,-2:nk+3))

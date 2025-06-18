@@ -79,7 +79,9 @@
       real*8      un(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8      vn(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8      wn(-2:ni+3,-2:nj+3,-2:nk+3)
-      real*8 uwall,dy,l1,l2
+      real*8 uwall,dy
+      real*8 l1(-2:ni+3,-2:nj+3,-2:nk+3)
+      real*8 l2(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8 phi(-2:ni+3,-2:nj+3,-2:nk+3)
 
       integer ierr

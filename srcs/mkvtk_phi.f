@@ -30,8 +30,8 @@
 !$OMP$ SHARED(mi,mj,mk,q)      
       do k=0,mk+1
       do i=0,mi+1
-      q(i,   0,k)=0.0d0
-      q(i,mj+1,k)=0.0d0
+      q(i,   0,k)=q(i,1,k)
+      q(i,mj+1,k)=q(i,mj,k)
 !      q(i,   0,k)=q(i, 1,k)
 !      q(i,mj+1,k)=q(i,mj,k)
       enddo
