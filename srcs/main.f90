@@ -176,7 +176,7 @@ theta_0_b = 64.0d0
 zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
 
 !pattern width
-width = 4
+width = 8
 
 !calculation gravity 
 !!!!
