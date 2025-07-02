@@ -69,7 +69,7 @@ real(8),dimension(:,:,:),allocatable :: l1_array
 real(8),dimension(:,:,:),allocatable :: l2_array
 real(8),dimension(:,:,:),allocatable :: zeta_array
 real(8),dimension(:,:,:),allocatable :: theta_array
-integer width
+integer period, ratio_a
 
 real(8),dimension(:,:,:),allocatable :: vorx,q
 real(8),dimension(:,:,:),allocatable :: phi_all,q_all,vorx_all,wrk_all,p_all
@@ -176,7 +176,8 @@ theta_0_b = 64.0d0
 zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
 
 !pattern width
-width = 8
+period = 8
+ratio_a = 0
 
 !calculation gravity 
 !!!!
@@ -197,10 +198,10 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array(ni,nj,nk,theta_0_a,theta_0_b,theta_0_array,width)
-call init_array(ni,nj,nk,l1_a,l1_b,l1_array,width)
-call init_array(ni,nj,nk,l2_a,l2_b,l2_array,width)
-call init_array(ni,nj,nk,zeta_a,zeta_b,zeta_array,width)
+call init_array_pt_ratio(ni,nj,nk,theta_0_a,theta_0_b,theta_0_array,period,ratio_a)
+call init_array_pt_ratio(ni,nj,nk,l1_a,l1_b,l1_array,period,ratio_a)
+call init_array_pt_ratio(ni,nj,nk,l2_a,l2_b,l2_array,period,ratio_a)
+call init_array_pt_ratio(ni,nj,nk,zeta_a,zeta_b,zeta_array,period,ratio_a)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -273,7 +274,9 @@ write(*,'("l1_b                ",20e20.10)')l1_b
 write(*,'("l2_b                ",20e20.10)')l2_b
 write(*,'("theta_0_b           ",20e20.10)')theta_0_b
 write(*,'("zeta_b              ",20e20.10)')zeta_b
-write(*,'("pattern width       ",1i9)')width
+write(*,'("pattern period      ",1i9)')period
+write(*,'("pattern ratio_a     ",1i9)')ratio_a
+write(*,'("pattern ratio_b     ",1i9)')period-ratio_a
 write(*,*)
 write(*,'("nmax                ",1i9)')nmax
 write(*,'("idout               ",1i9)')idout
