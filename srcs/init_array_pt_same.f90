@@ -1,4 +1,4 @@
-subroutine init_array(ni,nj,nk,q_a,q_b,q_array,width)
+subroutine init_array_pt_same(ni,nj,nk,q_a,q_b,q_array,width)
   implicit none
   integer :: ni,nj,nk
   real*8 :: q_a, q_b
@@ -34,4 +34,4 @@ subroutine init_array(ni,nj,nk,q_a,q_b,q_array,width)
   !$OMP END PARALLEL DO
 
   return
-end subroutine init_array
+end subroutine init_array_pt_same
