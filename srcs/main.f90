@@ -164,20 +164,20 @@ rmul=1.95d0
 rmug=1.95d0
 surface_tension=5.5d0
 
-uwall = 0.25d0
+uwall = -0.25d0
 l1_a = 2.165d0
 l2_a = l1_a
 theta_0_a = 90.0d0
 zeta_a = 0.21d0 * 6.0d0 * (rmul / l1_a + rmug / l2_a)
 
-l1_b = 1.087d0
+l1_b = 2.379d0
 l2_b = l1_b * 3.67d0/1.625d0
 theta_0_b = 64.0d0
 zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
 
 !pattern width
 period = 8
-ratio_a = 0
+ratio_a = 8
 
 !calculation gravity 
 !!!!
