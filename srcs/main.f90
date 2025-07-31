@@ -164,7 +164,7 @@ rmul=1.95d0
 rmug=1.95d0
 surface_tension=5.5d0
 
-uwall = -0.25d0
+uwall = 0.25d0
 l1_a = 2.165d0
 l2_a = l1_a
 theta_0_a = 90.0d0
@@ -177,7 +177,7 @@ zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
 
 !pattern width
 period = 8
-ratio_a = 8
+ratio_a = 0
 
 !calculation gravity 
 !!!!
@@ -725,7 +725,7 @@ if(mod(nstep,imkvtk).eq.0)then
 
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
-  call find_interface_positions(ni, nj, nk, phi_all, dx, dy)
+  call find_interface_positions(ni, nj, nk, phi_all, dx, dy, xl)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif
 endif

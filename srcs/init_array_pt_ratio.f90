@@ -25,9 +25,9 @@ subroutine init_array_pt_ratio(ni,nj,nk,q_a,q_b,q_array,period,ratio_a)
       !adv: (if: q_b, else: q_a)
       !rec: (if: q_a, else: q_b)
       if ( mod(i+period*2-1, period) < ratio_a) then
-        q_array(i, nj, k) = q_b
-      else
         q_array(i, nj, k) = q_a
+      else
+        q_array(i, nj, k) = q_b
       endif
       !if ((k == 0) .AND. (0 < i) .AND. (i <= 16) ) then
       !  write(*,'(20e20.10)') q_array(i,nj,k)
