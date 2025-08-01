@@ -16,6 +16,7 @@ ccc
       real*8    l1(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    l2(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    phi(-2:ni+3,-2:nj+3,-2:nk+3)
+      real*8    inv_ls1, inv_ls2
       real*8    phi_av, ls, coef1, coef2
 
       integer i,j,k
@@ -30,13 +31,15 @@ ccc
 !$OMP$ SCHEDULE(static,1)
 !$OMP$ DEFAULT(none)
 !$OMP$ PRIVATE(i,k)
-!$OMP$ PRIVATE(phi_av,ls,coef1,coef2)
+!$OMP$ PRIVATE(phi_av,inv_ls1,inv_ls2,ls,coef1,coef2)
 !$OMP$ SHARED(ni,nk)
 !$OMP$ SHARED(uk,vk,wk,phi,uwall,dy,l1,l2)
       do k=-2,nk+3
       do i=-2,ni+3
       phi_av = (phi(i,1,k) + phi(mod(i+1,ni+3),1,k))/2.0d0
-      ls = l2(i,1,k) + (l2(i,1,k)-l1(i,1,k))*phi_av
+      inv_ls1 = phi_av / l1(i,1,k)
+      inv_ls2 = (1.d0 - phi_av) / l2(i,1,k)
+      ls = 1.d0 / (inv_ls1 + inv_ls2)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
@@ -62,13 +65,15 @@ ccc
 !$OMP$ SCHEDULE(static,1)
 !$OMP$ DEFAULT(none)
 !$OMP$ PRIVATE(i,k)
-!$OMP$ PRIVATE(phi_av,ls,coef1,coef2)
+!$OMP$ PRIVATE(phi_av,inv_ls1,inv_ls2,ls,coef1,coef2)
 !$OMP$ SHARED(ni,nj,nk)
 !$OMP$ SHARED(uk,vk,wk,phi,uwall,dy,l1,l2)
       do k=-2,nk+3
       do i=-2,ni+3
       phi_av = (phi(i,nj,k) + phi(mod(i+1,ni+3),nj,k))/2.0d0
-      ls = l2(i,nj,k) + (l2(i,nj,k)-l1(i,nj,k))*phi_av
+      inv_ls1 = phi_av / l1(i,nj,k)
+      inv_ls2 = (1.d0 - phi_av) / l2(i,nj,k)
+      ls = 1.d0 / (inv_ls1 + inv_ls2)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)

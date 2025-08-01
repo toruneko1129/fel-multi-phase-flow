@@ -170,7 +170,7 @@ l2_a = l1_a
 theta_0_a = 90.0d0
 zeta_a = 0.21d0 * 6.0d0 * (rmul / l1_a + rmug / l2_a)
 
-l1_b = 1.087d0
+l1_b = 2.379d0
 l2_b = l1_b * 3.67d0/1.625d0
 theta_0_b = 64.0d0
 zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
@@ -725,7 +725,7 @@ if(mod(nstep,imkvtk).eq.0)then
 
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
-  call find_interface_positions(ni, nj, nk, phi_all, dx, dy)
+  call find_interface_positions(ni, nj, nk, phi_all, dx, dy, xl)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif
 endif
