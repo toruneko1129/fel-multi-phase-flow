@@ -95,6 +95,68 @@ ccc
 !$OMP  END PARALLEL DO
       endif
 
+!$OMP  PARALLEL DO
+!$OMP$ SCHEDULE(static,1)
+!$OMP$ DEFAULT(none)
+!$OMP$ PRIVATE(j,k)
+!$OMP$ SHARED(ni,nj,nk)
+!$OMP$ SHARED(uk,vk,wk)
+
+      do j = -2, nj+3
+      do k = -2, nk+3
+      uk(0 ,j,k) = uk(ni+1,j,k)
+      uk(-1,j,k) = uk(ni  ,j,k)
+      uk(-2,j,k) = uk(ni-1,j,k)
+      vk(0 ,j,k) = vk(ni  ,j,k)
+      vk(-1,j,k) = vk(ni-1,j,k)
+      vk(-2,j,k) = vk(ni-2,j,k)
+      wk(0 ,j,k) = wk(ni  ,j,k)
+      wk(-1,j,k) = wk(ni-1,j,k)
+      wk(-2,j,k) = wk(ni-2,j,k)
+
+      uk(ni+2, j, k) = uk(2, j, k)
+      uk(ni+3, j, k) = uk(3, j, k)
+      vk(ni+1, j, k) = vk(1, j, k)
+      vk(ni+2, j, k) = vk(2, j, k)
+      vk(ni+3, j, k) = vk(3, j, k)
+      wk(ni+1, j, k) = wk(1, j, k)
+      wk(ni+2, j, k) = wk(2, j, k)
+      wk(ni+3, j, k) = wk(3, j, k)
+      end do
+      end do
+
+!$OMP  END PARALLEL DO
+
+
+!$OMP  PARALLEL DO
+!$OMP$ SCHEDULE(static,1)
+!$OMP$ DEFAULT(none)
+!$OMP$ PRIVATE(i,j)
+!$OMP$ SHARED(ni,nj,nk,uk,vk,wk)
+      do i = -2, ni+3
+      do j = -2, nj+3
+      uk(i, j,   0) = uk(i, j, nk  )
+      uk(i, j,  -1) = uk(i, j, nk-1)
+      uk(i, j,  -2) = uk(i, j, nk-2)
+      vk(i, j,   0) = vk(i, j, nk  )
+      vk(i, j,  -1) = vk(i, j, nk-1)
+      vk(i, j,  -2) = vk(i, j, nk-2)
+      wk(i, j,   0) = wk(i, j, nk+1)
+      wk(i, j,  -1) = wk(i, j, nk  )
+      wk(i, j,  -2) = wk(i, j, nk-1)
+
+      uk(i, j, nk+1) = uk(i, j,   1)
+      uk(i, j, nk+2) = uk(i, j,   2)
+      uk(i, j, nk+3) = uk(i, j,   3)
+      vk(i, j, nk+1) = vk(i, j,   1)
+      vk(i, j, nk+2) = vk(i, j,   2)
+      vk(i, j, nk+3) = vk(i, j,   3)
+      wk(i, j, nk+2) = wk(i, j,   2)
+      wk(i, j, nk+3) = wk(i, j,   3)
+      end do
+      end do
+!$OMP  END PARALLEL DO
+
       return
       end
 

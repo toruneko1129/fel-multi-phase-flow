@@ -177,7 +177,7 @@ zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
 
 !pattern width
 period = 8
-ratio_a = 0
+ratio_a = 8
 
 !calculation gravity 
 !!!!
@@ -241,6 +241,9 @@ imkuvp  =1000000
 imkvtk  =nmax/120
 imon_t  =nmax/120
 ibudget =imon_t
+
+!dbg change
+nmax    =2000
 
 time=0.0d0
 
