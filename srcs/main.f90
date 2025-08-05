@@ -242,8 +242,6 @@ imkvtk  =nmax/120
 imon_t  =nmax/120
 ibudget =imon_t
 
-!dbg change
-nmax    =2000
 
 time=0.0d0
 
@@ -314,7 +312,7 @@ call init_phi(ndiv, svall, phi, nbub, 1, nsv)
 do l=1,nbub
 !>contact angle condition
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
-call gnbc(nID, ni, nj, nk, u, uwall, theta_0_array, &
+call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
           surface_tension, zeta_array, theta_array)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,l),theta_array,dx,dy,dz)
 !call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
@@ -350,7 +348,7 @@ call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,wn)
 
 !>contact angle condition
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,0))
-call gnbc(nID, ni, nj, nk, u, uwall, theta_0_array, &
+call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
           surface_tension, zeta_array, theta_array)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,0),theta_array,dx,dy,dz)
 !call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
@@ -388,7 +386,7 @@ if(irestart.eq.1)then
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,po)
   !>contact angle condition
   !call bnd_neumann(nID,ni,nj,nk,phi )
-  call gnbc(nID, ni, nj, nk, u, uwall, theta_0_array, &
+  call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
             surface_tension, zeta_array, theta_array)
   call bnd_contact_angle(nID,ni,nj,nk,phi,theta_array,dx,dy,dz)
   !call bnd_dirichlet(nID,ni,nj,nk,phi)
@@ -487,7 +485,7 @@ call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phin(-2,-2,-2,l),
 call solphi_mthinc3(ipara,ni,nj,nk,dxinv,dyinv,dzinv,bet_mthinc,phix,phiy,phiz,phi(-2,-2,-2,l),phin(-2,-2,-2,l))
 !>contact angle condition
 !call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
-call gnbc(nID, ni, nj, nk, u, uwall, theta_0_array, &
+call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
           surface_tension, zeta_array, theta_array)
 call bnd_contact_angle(nID,ni,nj,nk,phin(-2,-2,-2,l),theta_array,dx,dy,dz)
 !call bnd_dirichlet(nID,ni,nj,nk,phin(-2,-2,-2,l))
@@ -501,7 +499,7 @@ call flush(6)
 call summation(ni,nj,nk,phin,nbub)
 !>contact angle condition
 call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,0))
-call gnbc(nID, ni, nj, nk, u, uwall, theta_0_array, &
+call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
           surface_tension, zeta_array, theta_array)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,0),theta_array,dx,dy,dz)
 !call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,0))

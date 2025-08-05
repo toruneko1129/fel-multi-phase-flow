@@ -52,9 +52,9 @@ ccc
       vk(i,  -1,k)=-vk(i,   1,k)
       vk(i,   0,k)=0.0d0
 
-      wk(i,  -2,k)=-wk(i,   3,k)
-      wk(i,  -1,k)=-wk(i,   2,k)
-      wk(i,   0,k)=-wk(i,   1,k)
+      wk(i,   0,k) = coef2 * wk(i,   1,k)
+      wk(i,  -1,k) = 2.d0 * wk(i,   0,k) - wk(i,   1,k)
+      wk(i,  -2,k) = 2.d0 * wk(i,  -1,k) - wk(i,   0,k)
       enddo
       enddo
 !$OMP  END PARALLEL DO
@@ -87,9 +87,9 @@ ccc
       vk(i,nj+2,k)=-vk(i,nj-2,k)
       vk(i,nj+3,k)=-vk(i,nj-3,k)
 
-      wk(i,nj+1,k)=-wk(i,nj  ,k)
-      wk(i,nj+2,k)=-wk(i,nj-1,k)
-      wk(i,nj+3,k)=-wk(i,nj-2,k)
+      wk(i,nj+1,k) = coef2 * wk(i,nj  ,k)
+      wk(i,nj+2,k) = 2.d0 * wk(i,nj+1,k) - wk(i,nj  ,k)
+      wk(i,nj+3,k) = 2.d0 * wk(i,nj+2,k) - wk(i,nj+1,k)
       enddo
       enddo
 !$OMP  END PARALLEL DO
