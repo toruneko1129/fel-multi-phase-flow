@@ -33,7 +33,7 @@ subroutine bnd_contact_angle(nID, ni, nj, nk, qk, theta_array, dx, dy, dz)
         cos_t     = cos(theta_rad)
         sin_t     = sin(theta_rad)
         nq_x =  sign(1.0d0, i - ni/2) * sin_t * aspect_x
-        nq_z =  sign(1.0d0, k - nk/2) * sin_t * aspect_z
+        nq_z =  sign(1.0d0, i - ni/2) * sin_t * aspect_z
         nq_y =  cos_t
         norm = sqrt(nq_x**2 + nq_y**2 + nq_z**2 + eps)
         nq_x = nq_x / norm
@@ -66,7 +66,7 @@ subroutine bnd_contact_angle(nID, ni, nj, nk, qk, theta_array, dx, dy, dz)
         cos_t     = cos(theta_rad)
         sin_t     = sin(theta_rad)
         nq_x =  sign(1.0d0, i - ni/2) * sin_t * aspect_x
-        nq_z =  sign(1.0d0, k - nk/2) * sin_t * aspect_z
+        nq_z =  sign(1.0d0, i - ni/2) * sin_t * aspect_z
         nq_y =  cos_t
         norm = sqrt(nq_x**2 + nq_y**2 + nq_z**2 + eps)
         nq_x = nq_x / norm
