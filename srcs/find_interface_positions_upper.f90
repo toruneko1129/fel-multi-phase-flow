@@ -1,4 +1,4 @@
-subroutine find_interface_positions(ni, nj, nk, phi, dx, dy, dz, xl)
+subroutine find_interface_positions_upper(ni, nj, nk, phi, dx, dy, dz, xl)
   implicit none
   ! 引数の定義
   integer ni, nj, nk
@@ -23,4 +23,4 @@ subroutine find_interface_positions(ni, nj, nk, phi, dx, dy, dz, xl)
     end do
   end do
 
-end subroutine find_interface_positions
+end subroutine find_interface_positions_upper

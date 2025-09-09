@@ -182,8 +182,8 @@ theta_0_c = 180.0d0 - theta_0_b
 zeta_c = zeta_b
 
 !pattern width
-period = 8
-ratio_a = 8
+period = 1
+ratio_a = 2
 
 !calculation gravity 
 !!!!
@@ -736,7 +736,8 @@ if(mod(nstep,imkvtk).eq.0)then
 
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
-  call find_interface_positions(ni, nj, nk, phi_all, dx, dy, xl)
+  call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif
 endif

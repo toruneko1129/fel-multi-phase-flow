@@ -76,7 +76,8 @@ init_phi_legendre.f90 \
 init_array_checker.f90 \
 init_array_pt_same.f90 \
 init_array_pt_ratio.f90 \
-find_interface_positions.f90 \
+find_interface_positions_lower.f90 \
+find_interface_positions_upper.f90 \
 main.f90            \
 
 SRCS	=	$(addprefix $(SRCDIR)/, $(F90SRCS)) \
