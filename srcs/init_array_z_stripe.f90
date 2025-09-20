@@ -33,7 +33,7 @@ subroutine init_array_z_stripe(ni,nj,nk,q_a,q_b,q_c,q_array,period,ratio_a)
         ! period マスごとに色が切り替わるブロック状チェッカーパターン
         ! (i+ni) と (k+nk) で負インデックスの影響を避けつつ原実装の位相を踏襲
         ii = (i + ni - 1) / period
-        kk = (k + nk - 1) / period
+        kk = (ratio_a*ii + k + nk - 1) / period
         parity = mod(kk, 2)
       end if
 
@@ -47,9 +47,10 @@ subroutine init_array_z_stripe(ni,nj,nk,q_a,q_b,q_c,q_array,period,ratio_a)
   !$OMP END PARALLEL DO
 
   ! デバッグ出力（必要なら有効化）
-  !do k = -2, nk+3
-  !  do i = -2, ni+3
-  !    if ((3 <= k) .AND. (k <= 6) .AND. (1 <= i) .AND. (i <= 4) ) then
+  write(*,'("wall type: z_stripe")')
+  !do i = -2, ni+3
+  ! do k = -2, nk+3
+  !    if ((1 <= k) .AND. (k <= 6) .AND. (4 <= i) .AND. (i <= 5) ) then
   !      write(*,'(1i2, 1i2, 20e20.10)') i, k, q_array(i,nj,k)
   !    end if
   !  enddo

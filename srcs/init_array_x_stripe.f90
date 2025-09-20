@@ -32,8 +32,8 @@ subroutine init_array_x_stripe(ni,nj,nk,q_a,q_b,q_c,q_array,period,ratio_a)
       else
         ! period マスごとに色が切り替わるブロック状チェッカーパターン
         ! (i+ni) と (k+nk) で負インデックスの影響を避けつつ原実装の位相を踏襲
-        ii = (i + ni - 1) / period
         kk = (k + nk - 1) / period
+        ii = (ratio_a*kk + i + ni - 1) / period
         parity = mod(ii, 2)
       end if
 
@@ -47,9 +47,10 @@ subroutine init_array_x_stripe(ni,nj,nk,q_a,q_b,q_c,q_array,period,ratio_a)
   !$OMP END PARALLEL DO
 
   ! デバッグ出力（必要なら有効化）
+  write(*,'("wall type: x_stripe")')
   !do k = -2, nk+3
   !  do i = -2, ni+3
-  !    if ((3 <= k) .AND. (k <= 6) .AND. (1 <= i) .AND. (i <= 4) ) then
+  !    if ((4 <= k) .AND. (k <= 5) .AND. (1 <= i) .AND. (i <= 6) ) then
   !      write(*,'(1i2, 1i2, 20e20.10)') i, k, q_array(i,nj,k)
   !    end if
   !  enddo
