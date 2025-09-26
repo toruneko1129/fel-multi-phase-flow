@@ -28,7 +28,7 @@ subroutine init_array_x_stripe(ni,nj,nk,q_a,q_b,q_c,q_array,period,ratio_a)
       ! 上側境界のチェッカーボード
       if (period == 1) then
         ! 元の実装：1セルごと交互
-        parity = mod(i + ni, 2)
+        parity = mod(i + ni - 1, 2)
       else
         ! period マスごとに色が切り替わるブロック状チェッカーパターン
         ! (i+ni) と (k+nk) で負インデックスの影響を避けつつ原実装の位相を踏襲
