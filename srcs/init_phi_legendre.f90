@@ -16,7 +16,8 @@ subroutine init_phi(ndiv, svall, phi, nbub, num, nsv)
       do k = -2, nk + 3
       do j = 1, nj
       do i = -2, ni + 3
-          if (2 * nsv < i .and. i <= 6 * nsv) then
+          !if (2 * nsv < i .and. i <= 6 * nsv) then
+          if (nsv < i .and. i <= 3 * nsv) then
               phi(i, j, k, num) = 1.0d0
           else
               phi(i, j, k, num) = 0.0d0
