@@ -70,16 +70,25 @@ trans_r2w.f			 \
 trans_w2r.f                      \
 
 F90SRCS =           \
+bell_weight.f90 \
+slip_len_profile.f90 \
 bnd_contact_angle.f90 \
+bndu_free_slip.f90 \
+bndu_local_slip.f90 \
 gnbc.f90 \
 init_phi_legendre.f90 \
 init_array_checker.f90 \
+init_array_monotone.f90 \
 init_array_pt_same.f90 \
 init_array_pt_ratio.f90 \
 init_array_x_stripe.f90 \
 init_array_z_stripe.f90 \
 find_interface_positions_lower.f90 \
 find_interface_positions_upper.f90 \
+find_interface_positions.f90 \
+find_interface_positions_angle.f90 \
+find_two_contacts_on_wall.f90 \
+find_two_contacts_on_wall_index.f90 \
 main.f90            \
 
 SRCS	=	$(addprefix $(SRCDIR)/, $(F90SRCS)) \
