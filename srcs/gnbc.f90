@@ -27,7 +27,10 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   logical :: hup_top(-2:nk+3), hdn_top(-2:nk+3), hup_bot(-2:nk+3), hdn_bot(-2:nk+3)
   logical :: is_band, dbg
   real*8 :: delta_x, x_c
-
+  real*8, external :: cox_voinov, dcox_voinov_dtheta, cox_voinov_inverse
+  real*8 :: tol
+  integer :: itmax
+  
   pi = acos(-1.0d0)
   eps = 1.0d-12
   dy = 13.6d0 / 128
@@ -35,6 +38,8 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   width = 5  ! 接触点近傍の幅（セル数）
   alpha = 1.0d0
   coeff = 0.917d0 * 1.95d0 * uwall / surface_tension
+  tol = 1.0d-10
+  itmax = 30
 
   call find_two_contacts_on_wall(ni,nj,nk,phi,dx,  1, xup_bot,hup_bot, xdn_bot,hdn_bot)
   call find_two_contacts_on_wall(ni,nj,nk,phi,dx, nj, xup_top,hup_top, xdn_top,hdn_top)
@@ -46,7 +51,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   !--- Y−面（j=1）---
   if(nID(Y_MINUS).lt.0)then
 !$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t, is_band, cos_old, g_micro, g_macro, nine_g) &
-!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha)
+!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax)
     do k=-2,nk+3
       do i=-2,ni+3
         ! ---- 接触点近傍（±width）チェック：該当しなければスキップ ----
@@ -82,21 +87,16 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         cos_theta_t = (1.d0 - alpha)*cos_old + alpha*cos_theta_t
 
         !--- cos_theta_t をクランプ（数値誤差防止） ---
-        cos_theta_t = min(1.0d0, max(-1.0d0, cos_theta_t))
+        cos_theta_t = min(0.866d0, max(-0.866d0, cos_theta_t))
         
         theta_t_rad = acos(cos_theta_t)
         !cox-voinov law
-        !g_micro = (theta_t_rad**3) / 9.0d0
-        !g_macro = g_micro + (0.917d0 * 1.95d0 / surface_tension) * u_cl
-        !if (g_macro < 0.d0) then
-        !  g_macro = 0.d0   ! 安全側クランプ（数値誤差/極端条件対策）
-        !endif
-        !nine_g  = 9.0d0 * g_macro
-        !if (nine_g <= 0.d0) then
-        !  theta_t_rad = 0.d0
-        !else
-        !  theta_t_rad = nine_g**(1.0d0/3.0d0)
-        !end if
+        g_micro = cox_voinov(theta_t_rad)    
+        g_macro = g_micro + (1.116d0 * 1.95d0 / surface_tension) * u_cl
+        if (g_macro < 0.d0) then
+          g_macro = 0.d0   ! 安全側クランプ（数値誤差/極端条件対策）
+        endif
+        theta_t_rad = cox_voinov_inverse(theta_t_rad, g_macro, 30.0d0, 150.0d0, tol, itmax)
 
         theta_t = theta_t_rad*(180.0d0/pi)
 
@@ -124,7 +124,7 @@ end do
   !--- Y＋面（j=nj）---
   if(nID(Y_PLUS).lt.0)then
 !$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t,is_band,cos_old,g_micro,g_macro,nine_g) &
-!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_top,idn_top,hup_top,hdn_top, width, alpha,dbg,xup_top,xdn_top,dy,delta_x,x_c)
+!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_top,idn_top,hup_top,hdn_top, width, alpha,dbg,xup_top,xdn_top,dy,delta_x,x_c,tol,itmax)
     do k=-2,nk+3
       do i=-2,ni+3
         ! ---- 接触点近傍（±width）チェック：該当しなければスキップ ----
@@ -161,24 +161,27 @@ end do
         cos_theta_t = (1.d0 - alpha)*cos_old + alpha*cos_theta_t
 
         !--- cos_theta_t をクランプ（数値誤差防止） ---
-        cos_theta_t = min(1.0d0, max(-1.0d0, cos_theta_t))
+        cos_theta_t = min(0.866d0, max(-0.866d0, cos_theta_t))
         
         theta_t_rad = acos(cos_theta_t)
+        !if (dbg .and. (k==nk/2) .and. (i==idn_top(k))) then
+        !  write(*,*) 'u_cl=', u_cl
+        !  write(*,*) 'theta_m=', theta_t_rad*(180.0d0/pi)
+        !endif
         
         !cox-voinov law
-        !g_micro = (theta_t_rad**3) / 9.0d0
-        !g_macro = g_micro + (0.917d0 * 1.95d0 / surface_tension) * u_cl
-        !if (g_macro < 0.d0) then
-        !  g_macro = 0.d0   ! 安全側クランプ（数値誤差/極端条件対策）
-        !endif
-        !nine_g  = 9.0d0 * g_macro
-        !if (nine_g <= 0.d0) then
-        !  theta_t_rad = 0.d0
-        !else
-        !  theta_t_rad = nine_g**(1.0d0/3.0d0)
-        !end if
+        g_micro = cox_voinov(theta_t_rad)    
+        g_macro = g_micro + (1.116d0 * 1.95d0 / surface_tension) * u_cl
+        if (g_macro < 0.d0) then
+          g_macro = 0.d0   ! 安全側クランプ（数値誤差/極端条件対策）
+        endif
+        theta_t_rad = cox_voinov_inverse(theta_t_rad, g_macro, 30.0d0, 150.0d0, tol, itmax)
 
         theta_t = theta_t_rad*(180.0d0/pi)
+
+        !if (dbg .and. (k==nk/2) .and. (i==idn_top(k))) then
+        !  write(*,*) 'theta_M=', theta_t_rad*(180.0d0/pi)
+        !endif
 
         if (dbg .and. (k==nk/2) .and. (i==idn_top(k))) then
           !write(*,*)  'u=', uwall+u_cl, 'x_c^n=', xdn_top(k) + dy * 2 / tan(theta_array(i, nj, k)*(pi/180.0d0)) - 51.0d0

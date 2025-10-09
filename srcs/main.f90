@@ -503,7 +503,7 @@ call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phin(-2,-2,-2,l),
 call solphi_mthinc3(ipara,ni,nj,nk,dxinv,dyinv,dzinv,bet_mthinc,phix,phiy,phiz,phi(-2,-2,-2,l),phin(-2,-2,-2,l))
 !>contact angle condition
 if(mod(nstep,1).eq.0)then
-  call find_interface_positions_angle(ni, nj, nk, phin(-2,-2,-2,1), dx, dy, dz, xl, theta_array,delta_x,x_c, err_gnbc)
+  !call find_interface_positions_angle(ni, nj, nk, phin(-2,-2,-2,1), dx, dy, dz, xl, theta_array,delta_x,x_c, err_gnbc)
 endif
 
 !call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
@@ -754,7 +754,7 @@ if(mod(nstep,imkvtk).eq.0)then
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
   !call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
-  !call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif

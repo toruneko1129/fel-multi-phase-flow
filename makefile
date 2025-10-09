@@ -75,6 +75,7 @@ slip_len_profile.f90 \
 bnd_contact_angle.f90 \
 bndu_free_slip.f90 \
 bndu_local_slip.f90 \
+cox_voinov.f90 \
 gnbc.f90 \
 init_phi_legendre.f90 \
 init_array_checker.f90 \

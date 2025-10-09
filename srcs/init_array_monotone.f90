@@ -19,12 +19,12 @@ subroutine init_array_monotone(ni,nj,nk,q_a,q_b,q_c,q_array,period,ratio_a)
   !$OMP END PARALLEL DO
 
   !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(i,k) & 
-  !$OMP& SHARED(ni,nj,nk,q_a,q_array) SCHEDULE(static,1)
+  !$OMP& SHARED(ni,nj,nk,q_a,q_b,q_c,q_array) SCHEDULE(static,1)
   do k = -2, nk+3
     do i = -2, ni+3
       ! 下側境界
       q_array(i, 1, k) = q_a
-      q_array(i, nj, k) = q_a
+      q_array(i, nj, k) = q_c
     end do
   end do
   !$OMP END PARALLEL DO

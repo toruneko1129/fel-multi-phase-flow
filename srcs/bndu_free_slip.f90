@@ -31,10 +31,10 @@ subroutine bndu_localized_free(nID,ni,nj,nk,uk,vk,wk,uwall,dx,dy,l1,l2,phi)
 
   tiny  = 1.0d-300
   epsb  = dx * 2.5d0
-  l_free = 100.d0*dy          ! free-slip 相当の大滑り長さ
-  r0     = -0.5d0*dx           ! コア半径
-  r1     = 1.0d0*dx           ! 遷移外縁1
-  r2     = ni*dx           ! 遷移外縁2
+  l_free = 1.0d0*dy          ! free-slip 相当の大滑り長さ
+  r0     = 2.0d0*dx            ! コア半径
+  r1     = 5.0d0*dx            ! 遷移外縁1
+  r2     = 64.0d0*dx           ! 遷移外縁2
 
   ! 各壁の2交差を取得
   call find_two_contacts_on_wall(ni,nj,nk,phi,dx,  1, xup_bot,hup_bot, xdn_bot,hdn_bot)
