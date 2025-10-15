@@ -1,3 +1,5 @@
+!cox-voinov law
+!>>>1.116d0 or 3.420d0
 subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
                 surface_tension, zeta_array, theta_array, dx, phi, dbg, delta_x, x_c)
 
@@ -70,8 +72,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         u_cl_x = (uk(mi,0,k) + uk(mi,1,k) + uk(i,0,k) + uk(i,1,k))/4.0d0 + uwall
 
         !--- 接触線速度 z成分 ---
-        !u_cl_z = (wk(i,0,k) + wk(i,1,k))/2.0d0
-        u_cl_z = 0.0d0
+        u_cl_z = (wk(i,0,k) + wk(i,1,k))/2.0d0
 
         !--- 接触線速度ベクトルの大きさ (符号はx方向で決定) ---
         u_cl = sign(sqrt(u_cl_x**2 + u_cl_z**2 + eps), u_cl_x)
@@ -84,7 +85,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         cos_theta_0 = cos(theta_0_rad)
         cos_old = cos(theta_array(i,1,k) * (pi/180.0d0))
         cos_theta_t = cos_theta_0 - zeta_array(i, 1, k)*u_cl/surface_tension
-        cos_theta_t = (1.d0 - alpha)*cos_old + alpha*cos_theta_t
+        !cos_theta_t = (1.d0 - alpha)*cos_old + alpha*cos_theta_t
 
         !--- cos_theta_t をクランプ（数値誤差防止） ---
         cos_theta_t = min(0.866d0, max(-0.866d0, cos_theta_t))
@@ -143,8 +144,7 @@ end do
         u_cl_x = (uk(mi,nj,k) + uk(mi,nj+1,k) + uk(i,nj,k) + uk(i,nj+1,k))/4.0d0 - uwall
 
         !--- 接触線速度 z成分 ---
-        !u_cl_z = (wk(i,nj,k) + wk(i,nj+1,k))/2.0d0
-        u_cl_z = 0.0d0
+        u_cl_z = (wk(i,nj,k) + wk(i,nj+1,k))/2.0d0
 
         !--- 接触線速度ベクトルの大きさ (符号はx方向で決定) ---
         u_cl = sign(sqrt(u_cl_x**2 + u_cl_z**2 + eps), u_cl_x)
@@ -158,7 +158,7 @@ end do
         cos_theta_0 = cos(theta_0_rad)
         cos_old = cos(theta_array(i,nj,k) * (pi/180.0d0))
         cos_theta_t = cos_theta_0 - zeta_array(i, nj, k)*u_cl/surface_tension
-        cos_theta_t = (1.d0 - alpha)*cos_old + alpha*cos_theta_t
+        !cos_theta_t = (1.d0 - alpha)*cos_old + alpha*cos_theta_t
 
         !--- cos_theta_t をクランプ（数値誤差防止） ---
         cos_theta_t = min(0.866d0, max(-0.866d0, cos_theta_t))

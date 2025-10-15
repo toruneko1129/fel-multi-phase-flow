@@ -47,6 +47,7 @@ subroutine init_array_pt_checker(ni,nj,nk,q_a,q_b,q_c,q_array,period,ratio_a)
   !$OMP END PARALLEL DO
 
   ! デバッグ出力（必要なら有効化）
+  write(*,'("wall type: checkerboard")')
   !do k = -2, nk+3
   !  do i = -2, ni+3
   !    if ((3 <= k) .AND. (k <= 6) .AND. (1 <= i) .AND. (i <= 4) ) then

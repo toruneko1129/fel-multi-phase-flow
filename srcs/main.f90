@@ -85,7 +85,7 @@ real(8) :: avphin,err_div0,err_div
 real(8) :: rho_av,rhon_av
 real(8) :: center_pre1,center_pre2,velocity
 logical dbg
-real(8) :: delta_x, x_c, err_gnbc
+real(8) :: delta_x, x_c, err_gnbc, xscale
 
 delta_x = 0.0d0
 x_c = 0.0d0
@@ -98,7 +98,7 @@ nsv=128
 
 svall(1)=nsv*4
 svall(2)=nsv
-svall(3)=2
+svall(3)=32
 
 ! irestart=1 if computation will be restarted (input data are needed).
 ! irestart=0 if computation will be started from t=0.
@@ -152,6 +152,7 @@ pi=atan(1.0d0)*4.0d0
 
 ! drv_prs_grad: driving pressure gradient in x
 ! xl, yl, zl: lengthes in x, y and z directions to describe domain size
+! xscale: change(xl, yl) domain size
 ! surface_tension: surface_tension
 ! particle_radius: particle radius
 ! particle_init_[xyz]: initial position from the origin at the system centroid
@@ -161,9 +162,11 @@ pi=atan(1.0d0)*4.0d0
 ! theta_0: static contact angle at the wall[deg]
 
 !!!!
-xl=68.0d0
-yl=13.6d0
-zl=4.25d0/16.0d0
+xscale=1.0d2
+
+xl=68.0d0*xscale
+yl=13.6d0*xscale
+zl=4.25d0*xscale
 
 rhol=8.1d-1
 rhog=8.1d-1
@@ -188,7 +191,7 @@ theta_0_c = 180.0d0 - theta_0_b
 zeta_c = zeta_b
 
 !pattern width
-period = 4
+period = 16
 ratio_a = 0
 
 !calculation gravity 
@@ -210,11 +213,11 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array_monotone(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
-call init_array_monotone(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
-call init_array_monotone(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
-call init_array_monotone(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
-call init_array_monotone(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -269,6 +272,7 @@ write(*,'("nj=                 ",1i9)')nj
 write(*,'("nk=                 ",1i9)')nk
 write(*,'("irestart=           ",1i9)')irestart
 write(*,*)
+write(*,'("xscale=             ",20e20.10)')xscale
 write(*,'("xl=                 ",20e20.10)')xl
 write(*,'("yl=                 ",20e20.10)')yl
 write(*,'("zl=                 ",20e20.10)')zl
@@ -486,7 +490,7 @@ endif
 
 !call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-dt=32.0d-2/nsv*tscale
+dt=32.0d-2/nsv*tscale*xscale*2.0d0
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
@@ -764,6 +768,8 @@ call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
 
 enddo !nstep
+
+call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
 
 call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
