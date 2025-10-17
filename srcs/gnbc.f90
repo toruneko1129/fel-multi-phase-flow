@@ -32,10 +32,16 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   real*8, external :: cox_voinov, dcox_voinov_dtheta, cox_voinov_inverse
   real*8 :: tol
   integer :: itmax
+
+  real*8 dz
+  real*8 nwx, nwz
+  real*8 dphidx, dphidz, normxz
+  integer ip, im, kp, km
   
   pi = acos(-1.0d0)
   eps = 1.0d-12
   dy = 13.6d0 / 128
+  dz = dx
 
   width = 5  ! 接触点近傍の幅（セル数）
   alpha = 1.0d0
@@ -52,8 +58,8 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
 
   !--- Y−面（j=1）---
   if(nID(Y_MINUS).lt.0)then
-!$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t, is_band, cos_old, g_micro, g_macro, nine_g) &
-!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax)
+!$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t, is_band, cos_old, g_micro, g_macro, nine_g, nwx, nwz, dphidx, dphidz, normxz, ip, im, kp, km) &
+!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz)
     do k=-2,nk+3
       do i=-2,ni+3
         ! ---- 接触点近傍（±width）チェック：該当しなければスキップ ----
@@ -74,11 +80,16 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         !--- 接触線速度 z成分 ---
         u_cl_z = (wk(i,0,k) + wk(i,1,k))/2.0d0
 
+        ip = i+1; im = i-1; kp = k+1; km = k-1
+        dphidx = (phi(ip, 1, k) - phi(im, 1, k)) / (2.0d0*dx)
+        dphidz = (phi(i, 1, kp) - phi(i, 1, km)) / (2.0d0*dz)
+        normxz = sqrt(dphidx*dphidx + dphidz*dphidz + eps)
+        nwx = dphidx / normxz
+        nwz = dphidz / normxz
+
         !--- 接触線速度ベクトルの大きさ (符号はx方向で決定) ---
-        u_cl = sign(sqrt(u_cl_x**2 + u_cl_z**2 + eps), u_cl_x)
-        if (i <= ni/2) then
-          u_cl = -u_cl
-        endif
+        u_cl = u_cl_x * nwx + u_cl_z * nwz
+        u_cl = -u_cl
 
         !--- 動的接触角計算 ---
         theta_0_rad = theta_0_array(i, 1, k)*(pi/180.0d0)
@@ -92,6 +103,8 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         
         theta_t_rad = acos(cos_theta_t)
         !cox-voinov law
+        !fix theta_t_rad to theta_0_rad -> No GNBC
+        !theta_t_rad = theta_0_rad
         g_micro = cox_voinov(theta_t_rad)    
         g_macro = g_micro + (1.116d0 * 1.95d0 / surface_tension) * u_cl
         if (g_macro < 0.d0) then
@@ -102,6 +115,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         theta_t = theta_t_rad*(180.0d0/pi)
 
         theta_array(i, 1, k) = theta_t
+        theta_array(i, 1, k) = theta_0_array(i, 1, k)
       enddo
     enddo
 !$OMP  END PARALLEL DO
@@ -124,8 +138,8 @@ end do
 
   !--- Y＋面（j=nj）---
   if(nID(Y_PLUS).lt.0)then
-!$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t,is_band,cos_old,g_micro,g_macro,nine_g) &
-!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_top,idn_top,hup_top,hdn_top, width, alpha,dbg,xup_top,xdn_top,dy,delta_x,x_c,tol,itmax)
+!$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t, is_band, cos_old, g_micro, g_macro, nine_g, nwx, nwz, dphidx, dphidz, normxz, ip, im, kp, km) &
+!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz)
     do k=-2,nk+3
       do i=-2,ni+3
         ! ---- 接触点近傍（±width）チェック：該当しなければスキップ ----
@@ -145,12 +159,17 @@ end do
 
         !--- 接触線速度 z成分 ---
         u_cl_z = (wk(i,nj,k) + wk(i,nj+1,k))/2.0d0
+  
+        ip = i+1; im = i-1; kp = k+1; km = k-1
+        dphidx = (phi(ip, nj, k) - phi(im, nj, k)) / (2.0d0*dx)
+        dphidz = (phi(i, nj, kp) - phi(i, nj, km)) / (2.0d0*dz)
+        normxz = sqrt(dphidx*dphidx + dphidz*dphidz + eps)
+        nwx = dphidx / normxz
+        nwz = dphidz / normxz
 
         !--- 接触線速度ベクトルの大きさ (符号はx方向で決定) ---
-        u_cl = sign(sqrt(u_cl_x**2 + u_cl_z**2 + eps), u_cl_x)
-        if (i <= ni/2) then
-          u_cl = -u_cl
-        endif
+        u_cl = u_cl_x * nwx + u_cl_z * nwz
+        u_cl = -u_cl
 
 
         !--- 動的接触角計算 ---
@@ -170,6 +189,8 @@ end do
         !endif
         
         !cox-voinov law
+        !fix theta_t_rad to theta_0_rad -> No GNBC
+        !theta_t_rad = theta_0_rad
         g_micro = cox_voinov(theta_t_rad)    
         g_macro = g_micro + (1.116d0 * 1.95d0 / surface_tension) * u_cl
         if (g_macro < 0.d0) then
@@ -190,6 +211,7 @@ end do
         endif
 
         theta_array(i, nj, k) = theta_t
+        theta_array(i, nj, k) = theta_0_array(i, nj, k)
       enddo
     enddo
 !$OMP  END PARALLEL DO

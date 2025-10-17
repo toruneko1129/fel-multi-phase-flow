@@ -191,7 +191,7 @@ theta_0_c = 180.0d0 - theta_0_b
 zeta_c = zeta_b
 
 !pattern width
-period = 16
+period = 8
 ratio_a = 0
 
 !calculation gravity 
@@ -213,11 +213,11 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array_x_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
-call init_array_x_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
-call init_array_x_stripe(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
-call init_array_x_stripe(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
-call init_array_x_stripe(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
+call init_array_z_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
+call init_array_z_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
+call init_array_z_stripe(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
+call init_array_z_stripe(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
+call init_array_z_stripe(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -490,7 +490,7 @@ endif
 
 !call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-dt=32.0d-2/nsv*tscale*xscale*2.0d0
+dt=32.0d-2/nsv*tscale*xscale
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
