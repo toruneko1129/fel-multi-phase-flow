@@ -12,7 +12,7 @@ subroutine find_interface_positions(ni, nj, nk, phi, dx, dy, dz, xl)
   ! 界面位置の検出と出力
   !do k = 1, nk
   !z = (k - 0.5d0) * dz
-  print *, 'z =', z
+  !print *, 'z =', z
   do j = 1, nj
     y = (j - 0.5d0) * dy
     do i = 1, ni

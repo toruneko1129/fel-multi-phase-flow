@@ -336,7 +336,7 @@ do l=1,nbub
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,l))
 call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
-          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c)
+          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c,rmu)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,l),theta_array,dx,dy,dz)
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,l))
 !call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
@@ -373,7 +373,7 @@ call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,wn)
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,0))
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,0))
 call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
-          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c)
+          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c,rmu)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,0),theta_array,dx,dy,dz)
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,0))
 !call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
@@ -412,7 +412,7 @@ if(irestart.eq.1)then
   !call bnd_neumann(nID,ni,nj,nk,phi )
   call bnd_periodic(ni,nj,nk,phi )
   call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
-            surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c)
+            surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c,rmu)
   call bnd_contact_angle(nID,ni,nj,nk,phi,theta_array,dx,dy,dz)
   call bnd_periodic(ni,nj,nk,phi )
   !call bnd_dirichlet(nID,ni,nj,nk,phi)
@@ -516,7 +516,7 @@ endif
 !call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,l))
 call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
-          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c)
+          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c,rmu)
 call bnd_contact_angle(nID,ni,nj,nk,phin(-2,-2,-2,l),theta_array,dx,dy,dz)
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,l))
 !call bnd_dirichlet(nID,ni,nj,nk,phin(-2,-2,-2,l))
@@ -536,7 +536,7 @@ else
 endif
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,0))
 call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
-          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.true.,delta_x,x_c)
+          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.true.,delta_x,x_c,rmu)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,0),theta_array,dx,dy,dz)
 !call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,0))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,0))
@@ -763,8 +763,8 @@ if(mod(nstep,imkvtk).eq.0)then
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
 
-  call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
-  !call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  !call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl, delta_x, x_c, .true.)
   !call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
