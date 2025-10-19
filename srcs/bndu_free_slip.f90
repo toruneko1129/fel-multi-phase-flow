@@ -44,8 +44,8 @@ subroutine bndu_localized_free(nID,ni,nj,nk,uk,vk,wk,uwall,dx,dy,l1,l2,phi)
   if (nID(Y_MINUS) .lt. 0) then
 !$OMP PARALLEL DO DEFAULT(none) PRIVATE(i,k,phi_av,inv_ls1,inv_ls2,ls_mix,ls_eff,coef1,coef2,x_i,d,w_up,w_dn,w) &
 !$OMP& SHARED(ni,nk,dx,dy,uk,vk,wk,phi,uwall,l1,l2,epsb,xup_bot,xdn_bot,hup_bot,hdn_bot,tiny,l_free,r0,r1,r2)
-    do k=-2, nk+3
-      do i=-2, ni+3
+    do k=1, nk
+      do i=1, ni
         phi_av = 0.5d0*(phi(i,1,k) + phi(i+1,1,k))
         inv_ls1 =  phi_av        / max(l1(i,1,k), tiny)
         inv_ls2 = (1.0d0-phi_av) / max(l2(i,1,k), tiny)
@@ -87,8 +87,8 @@ subroutine bndu_localized_free(nID,ni,nj,nk,uk,vk,wk,uwall,dx,dy,l1,l2,phi)
   if (nID(Y_PLUS) .lt. 0) then
 !$OMP PARALLEL DO DEFAULT(none) PRIVATE(i,k,phi_av,inv_ls1,inv_ls2,ls_mix,ls_eff,coef1,coef2,x_i,d,w_up,w_dn,w) &
 !$OMP& SHARED(ni,nj,nk,dx,dy,uk,vk,wk,phi,uwall,l1,l2,epsb,xup_top,xdn_top,hup_top,hdn_top,tiny,l_free,r0,r1,r2)
-    do k=-2, nk+3
-      do i=-2, ni+3
+    do k=1, nk
+      do i=1, ni
         phi_av = 0.5d0*(phi(i,nj,k) + phi(i+1,nj,k))
         inv_ls1 =  phi_av        / max(l1(i,nj,k), tiny)
         inv_ls2 = (1.0d0-phi_av) / max(l2(i,nj,k), tiny)
@@ -140,8 +140,8 @@ subroutine bndu_localized_free(nID,ni,nj,nk,uk,vk,wk,uwall,dx,dy,l1,l2,phi)
 
   !================ x方向の周期コピー =================
 !$OMP PARALLEL DO SCHEDULE(static,1) DEFAULT(none) PRIVATE(j,k) SHARED(ni,nj,nk,uk,vk,wk)
-  do j = -2, nj+3
-    do k = -2, nk+3
+  do j = 1, nj
+    do k = 1, nk
       uk(0 ,j,k) = uk(ni+1,j,k)
       uk(-1,j,k) = uk(ni  ,j,k)
       uk(-2,j,k) = uk(ni-1,j,k)
@@ -166,8 +166,8 @@ subroutine bndu_localized_free(nID,ni,nj,nk,uk,vk,wk,uwall,dx,dy,l1,l2,phi)
 
   !================ z方向の周期コピー =================
 !$OMP PARALLEL DO SCHEDULE(static,1) DEFAULT(none) PRIVATE(i,j) SHARED(ni,nj,nk,uk,vk,wk)
-  do i = -2, ni+3
-    do j = -2, nj+3
+  do i = 1, ni
+    do j = 1, nj
       uk(i, j,   0) = uk(i, j, nk  )
       uk(i, j,  -1) = uk(i, j, nk-1)
       uk(i, j,  -2) = uk(i, j, nk-2)

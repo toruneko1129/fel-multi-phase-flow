@@ -10,8 +10,8 @@ subroutine find_interface_positions(ni, nj, nk, phi, dx, dy, dz, xl)
   real*8 :: phi1, phi2
 
   ! 界面位置の検出と出力
-  do k = 1, nk
-  z = (k - 0.5d0) * dz
+  !do k = 1, nk
+  !z = (k - 0.5d0) * dz
   print *, 'z =', z
   do j = 1, nj
     y = (j - 0.5d0) * dy
@@ -25,6 +25,6 @@ subroutine find_interface_positions(ni, nj, nk, phi, dx, dy, dz, xl)
       end if
     end do
   end do
-  end do
+  !end do
 
 end subroutine find_interface_positions

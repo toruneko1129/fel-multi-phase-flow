@@ -98,7 +98,7 @@ nsv=128
 
 svall(1)=nsv*4
 svall(2)=nsv
-svall(3)=32
+svall(3)=2
 
 ! irestart=1 if computation will be restarted (input data are needed).
 ! irestart=0 if computation will be started from t=0.
@@ -166,7 +166,7 @@ xscale=1.0d2
 
 xl=68.0d0*xscale
 yl=13.6d0*xscale
-zl=4.25d0*xscale
+zl=4.25d0*xscale/16.0d0
 
 rhol=8.1d-1
 rhog=8.1d-1
@@ -191,7 +191,7 @@ theta_0_c = 180.0d0 - theta_0_b
 zeta_c = zeta_b
 
 !pattern width
-period = 8
+period = 1
 ratio_a = 0
 
 !calculation gravity 
@@ -213,11 +213,11 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array_z_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
-call init_array_z_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
-call init_array_z_stripe(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
-call init_array_z_stripe(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
-call init_array_z_stripe(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -334,11 +334,12 @@ call init_phi(ndiv, svall, phi, nbub, 1, nsv)
 do l=1,nbub
 !>contact angle condition
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
+call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,l))
 call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
           surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,l),theta_array,dx,dy,dz)
-!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,l))
+!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi(-2,-2,-2,l))
 enddo
 
@@ -346,9 +347,9 @@ call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
 call summation(ni,nj,nk,phi,nbub)
 
-call bndu_localized_free(nID,ni,nj,nk,u ,v ,w ,uwall,dx,dy,l1_array,l2_array,phi(-2,-2,-2,1))
-call bndu_localized_free(nID,ni,nj,nk,uo,vo,wo,uwall,dx,dy,l1_array,l2_array,phi(-2,-2,-2,1))
-call bndu_localized_free(nID,ni,nj,nk,un,vn,wn,uwall,dx,dy,l1_array,l2_array,phi(-2,-2,-2,1))
+call bndu(nID,ni,nj,nk,u ,v ,w ,uwall,dy,l1_array,l2_array,phi(-2,-2,-2,1))
+call bndu(nID,ni,nj,nk,uo,vo,wo,uwall,dy,l1_array,l2_array,phi(-2,-2,-2,1))
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1_array,l2_array,phi(-2,-2,-2,1))
 call bnd_periodic(ni,nj,nk,u )
 call bnd_periodic(ni,nj,nk,v )
 call bnd_periodic(ni,nj,nk,w )
@@ -370,11 +371,12 @@ call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,wn)
 
 !>contact angle condition
 !call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,0))
+call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,0))
 call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
           surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,0),theta_array,dx,dy,dz)
-!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,0))
+!call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi(-2,-2,-2,0))
 
 call mpi_barrier(mpi_comm_world,ierr)
@@ -388,8 +390,8 @@ nstep=0
 if(irestart.eq.1)then
   write(*,'("RESTART")')
   call datain(ipara,ID,ni,nj,nk,nbub,nstep,time,u,v,w,p,uo,vo,wo,po,phi)
-  call bndu_localized_free(nID,ni,nj,nk,u ,v ,w ,uwall,dx,dy,l1_array,l2_array,phi(-2,-2,-2,l))
-  call bndu_localized_free(nID,ni,nj,nk,uo,vo,wo,uwall,dx,dy,l1_array,l2_array,phi(-2,-2,-2,l))
+  call bndu(nID,ni,nj,nk,u ,v ,w ,uwall,dy,l1_array,l2_array,phi(-2,-2,-2,l))
+  call bndu(nID,ni,nj,nk,uo,vo,wo,uwall,dy,l1_array,l2_array,phi(-2,-2,-2,l))
   call bnd_periodic(ni,nj,nk,u )
   call bnd_periodic(ni,nj,nk,v )
   call bnd_periodic(ni,nj,nk,w )
@@ -408,11 +410,12 @@ if(irestart.eq.1)then
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,po)
   !>contact angle condition
   !call bnd_neumann(nID,ni,nj,nk,phi )
+  call bnd_periodic(ni,nj,nk,phi )
   call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
             surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c)
   call bnd_contact_angle(nID,ni,nj,nk,phi,theta_array,dx,dy,dz)
-  !call bnd_dirichlet(nID,ni,nj,nk,phi)
   call bnd_periodic(ni,nj,nk,phi )
+  !call bnd_dirichlet(nID,ni,nj,nk,phi)
   call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi )
 endif
 !cc< restart end
@@ -490,7 +493,7 @@ endif
 
 !call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-dt=32.0d-2/nsv*tscale*xscale
+dt=64.0d-2/nsv*tscale*xscale
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
@@ -511,11 +514,12 @@ if(mod(nstep,1).eq.0)then
 endif
 
 !call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
+call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,l))
 call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
           surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.false.,delta_x,x_c)
 call bnd_contact_angle(nID,ni,nj,nk,phin(-2,-2,-2,l),theta_array,dx,dy,dz)
-!call bnd_dirichlet(nID,ni,nj,nk,phin(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,l))
+!call bnd_dirichlet(nID,ni,nj,nk,phin(-2,-2,-2,l))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,l))
 enddo
 
@@ -524,14 +528,15 @@ call flush(6)
 
 call summation(ni,nj,nk,phin,nbub)
 !>contact angle condition
-call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,0))
+!call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,0))
 if(mod(nstep,imon_t).eq.0)then
   dbg=.true.
 else
   dbg=.true.
 endif
+call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,0))
 call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
-          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),dbg,delta_x,x_c)
+          surface_tension, zeta_array, theta_array, dx, phi(-2,-2,-2,1),.true.,delta_x,x_c)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,0),theta_array,dx,dy,dz)
 !call bnd_dirichlet(nID,ni,nj,nk,phi(-2,-2,-2,0))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,0))
@@ -643,7 +648,7 @@ call solu_sor4(ipara,ID,nID,ndiv,ni,nj,nk,key,sendjb,recvjb &
   ,av_bs_w,av_ts_w,av_bn_w,av_tn_w &
   ,src_u,src_v,src_w,un,vn,wn,uwall,dy,l1_array,l2_array,phi(-2,-2,-2,l))
 
-call bndu_localized_free(nID,ni,nj,nk,un,vn,wn,uwall,dx,dy,l1_array,l2_array,phi(-2,-2,-2,l))
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1_array,l2_array,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,un)
 call bnd_periodic(ni,nj,nk,vn)
 call bnd_periodic(ni,nj,nk,wn)
@@ -668,7 +673,7 @@ call solp_fft_tdma4(ipara,ID,ndiv,ni,nj,nk,nstep,imon_t,rhog,dxinv,dyinv,dzinv,d
 
 call corunp_explicit(nID,ni,nj,nk,rhog,dxinv,dyinv,dzinv,dt,dp,phat,un,vn,wn,pn)
 
-call bndu_localized_free(nID,ni,nj,nk,un,vn,wn,uwall,dx,dy,l1_array,l2_array,phi(-2,-2,-2,l))
+call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1_array,l2_array,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,un)
 call bnd_periodic(ni,nj,nk,vn)
 call bnd_periodic(ni,nj,nk,wn)
@@ -757,8 +762,10 @@ if(mod(nstep,imkvtk).eq.0)then
 
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
-  !call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
+
   call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  !call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  !call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl, delta_x, x_c, .true.)
   !call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif
@@ -769,7 +776,7 @@ call flush(6)
 
 enddo !nstep
 
-call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
+!call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
 
 call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
