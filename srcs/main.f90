@@ -763,8 +763,8 @@ if(mod(nstep,imkvtk).eq.0)then
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
 
-  !call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
-  call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  !call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl, delta_x, x_c, .true.)
   !call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)

@@ -30,6 +30,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   logical :: is_band, dbg
   real*8 :: delta_x, x_c
   real*8, external :: cox_voinov_lambda1, dcox_voinov_dtheta_lambda1, cox_voinov_inverse_lambda1
+  real*8, external :: cox_voinov_lambda01, dcox_voinov_dtheta_lambda01, cox_voinov_inverse_lambda01
   real*8 :: tol
   integer :: itmax
 
@@ -110,12 +111,12 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         !cox-voinov law
         !fix theta_t_rad to theta_0_rad -> No GNBC
         !theta_t_rad = theta_0_rad
-        g_micro = cox_voinov_lambda1(theta_t_rad)    
+        g_micro = cox_voinov_lambda01(theta_t_rad)    
         g_macro = g_micro + (cox * rmu(i,1,k) / surface_tension) * u_cl
         if (g_macro < 0.d0) then
           g_macro = 0.d0   ! 安全側クランプ（数値誤差/極端条件対策）
         endif
-        theta_t_rad = cox_voinov_inverse_lambda1(theta_t_rad, g_macro, 30.0d0, 150.0d0, tol, itmax)
+        theta_t_rad = cox_voinov_inverse_lambda01(theta_t_rad, g_macro, 30.0d0, 150.0d0, tol, itmax)
 
         theta_t = theta_t_rad*(180.0d0/pi)
 
@@ -196,12 +197,12 @@ end do
         !cox-voinov law
         !fix theta_t_rad to theta_0_rad -> No GNBC
         !theta_t_rad = theta_0_rad
-        g_micro = cox_voinov_lambda1(theta_t_rad)    
+        g_micro = cox_voinov_lambda01(theta_t_rad)    
         g_macro = g_micro + (cox * rmu(i,nj,k) / surface_tension) * u_cl
         if (g_macro < 0.d0) then
           g_macro = 0.d0   ! 安全側クランプ（数値誤差/極端条件対策）
         endif
-        theta_t_rad = cox_voinov_inverse_lambda1(theta_t_rad, g_macro, 30.0d0, 150.0d0, tol, itmax)
+        theta_t_rad = cox_voinov_inverse_lambda01(theta_t_rad, g_macro, 30.0d0, 150.0d0, tol, itmax)
 
         theta_t = theta_t_rad*(180.0d0/pi)
 
