@@ -164,7 +164,7 @@ pi=atan(1.0d0)*4.0d0
 !!!!
 xscale=1.0d2
 uscale=1.0d0
-sigmascale=1.0d0
+sigmascale=2.0d0
 
 xl=68.0d0*xscale
 yl=13.6d0*xscale
@@ -254,7 +254,7 @@ bet_mthinc=2.0d0
 
 tscale  =1.0d0
 !nmax    =12000*nsv/32/tscale/2
-nmax    =120
+nmax    =12000
 idout   =1200000
 imkuvp  =1000000
 imkvtk  =nmax/120
@@ -493,9 +493,9 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-!dt=64.0d-2/nsv*tscale*xscale/uscale
+dt=64.0d-2/nsv*tscale*xscale/uscale
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
