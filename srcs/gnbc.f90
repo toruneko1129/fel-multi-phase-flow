@@ -40,7 +40,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   integer ip, im, kp, km
 
   real*8  :: rmu(-2:ni+3,-2:nj+3,-2:nk+3)
-  real*8  :: cox
+  real*8  :: cox, gmin, gmax
   
   pi = acos(-1.0d0)
   eps = 1.0d-12
@@ -51,8 +51,10 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   alpha = 1.0d0
   coeff = 0.917d0 * 1.95d0 * uwall / surface_tension
   tol = 1.0d-10
-  itmax = 30
+  itmax = 100
   cox = 1.116d0
+  gmin = cox_voinov_lambda01(30.d0*pi/180.d0)
+  gmax = cox_voinov_lambda01(150.d0*pi/180.d0)
 
   call find_two_contacts_on_wall(ni,nj,nk,phi,dx,  1, xup_bot,hup_bot, xdn_bot,hdn_bot)
   call find_two_contacts_on_wall(ni,nj,nk,phi,dx, nj, xup_top,hup_top, xdn_top,hdn_top)
@@ -64,7 +66,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   !--- Y−面（j=1）---
   if(nID(Y_MINUS).lt.0)then
 !$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t, is_band, cos_old, g_micro, g_macro, nine_g, nwx, nwz, dphidx, dphidz, normxz, ip, im, kp, km) &
-!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz)
+!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz, cox, gmin, gmax, rmu)
     do k=-2,nk+3
       do i=-2,ni+3
         ! ---- 接触点近傍（±width）チェック：該当しなければスキップ ----
@@ -112,11 +114,9 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         !fix theta_t_rad to theta_0_rad -> No GNBC
         !theta_t_rad = theta_0_rad
         g_micro = cox_voinov_lambda01(theta_t_rad)    
-        g_macro = g_micro + (cox * rmu(i,1,k) / surface_tension) * u_cl
-        if (g_macro < 0.d0) then
-          g_macro = 0.d0   ! 安全側クランプ（数値誤差/極端条件対策）
-        endif
-        theta_t_rad = cox_voinov_inverse_lambda01(theta_t_rad, g_macro, 30.0d0, 150.0d0, tol, itmax)
+        g_macro = g_micro + (cox * rmu(i,1,k) * u_cl / surface_tension)
+        g_macro = max(gmin, min(gmax, g_macro))
+        theta_t_rad = cox_voinov_inverse_lambda01(theta_array(i,1,k)*(pi/180.0d0), g_macro, 30.0d0, 150.0d0, tol, itmax)
 
         theta_t = theta_t_rad*(180.0d0/pi)
 
@@ -145,7 +145,7 @@ end do
   !--- Y＋面（j=nj）---
   if(nID(Y_PLUS).lt.0)then
 !$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t, is_band, cos_old, g_micro, g_macro, nine_g, nwx, nwz, dphidx, dphidz, normxz, ip, im, kp, km) &
-!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz)
+!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz, cox, gmin, gmax, rmu)
     do k=-2,nk+3
       do i=-2,ni+3
         ! ---- 接触点近傍（±width）チェック：該当しなければスキップ ----
@@ -198,15 +198,14 @@ end do
         !fix theta_t_rad to theta_0_rad -> No GNBC
         !theta_t_rad = theta_0_rad
         g_micro = cox_voinov_lambda01(theta_t_rad)    
-        g_macro = g_micro + (cox * rmu(i,nj,k) / surface_tension) * u_cl
-        if (g_macro < 0.d0) then
-          g_macro = 0.d0   ! 安全側クランプ（数値誤差/極端条件対策）
-        endif
-        theta_t_rad = cox_voinov_inverse_lambda01(theta_t_rad, g_macro, 30.0d0, 150.0d0, tol, itmax)
+        g_macro = g_micro + (cox * rmu(i,nj,k) * u_cl / surface_tension)
+        g_macro = max(gmin, min(gmax, g_macro))
+        theta_t_rad = cox_voinov_inverse_lambda01(theta_array(i,nj,k)*(pi/180.0d0), g_macro, 30.0d0, 150.0d0, tol, itmax)
 
         theta_t = theta_t_rad*(180.0d0/pi)
 
         !if (dbg .and. (k==nk/2) .and. (i==idn_top(k))) then
+        !  write(*,*) 'g_macro=', g_macro
         !  write(*,*) 'theta_M=', theta_t_rad*(180.0d0/pi)
         !endif
 

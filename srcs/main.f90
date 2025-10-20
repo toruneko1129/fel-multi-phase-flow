@@ -85,7 +85,7 @@ real(8) :: avphin,err_div0,err_div
 real(8) :: rho_av,rhon_av
 real(8) :: center_pre1,center_pre2,velocity
 logical dbg
-real(8) :: delta_x, x_c, err_gnbc, xscale
+real(8) :: delta_x, x_c, err_gnbc, xscale, uscale, sigmascale
 
 delta_x = 0.0d0
 x_c = 0.0d0
@@ -163,27 +163,29 @@ pi=atan(1.0d0)*4.0d0
 
 !!!!
 xscale=1.0d2
+uscale=1.0d0
+sigmascale=1.0d0
 
 xl=68.0d0*xscale
 yl=13.6d0*xscale
-zl=4.25d0*xscale/16.0d0
+zl=8.50d0*xscale/32.0d0
 
 rhol=8.1d-1
 rhog=8.1d-1
-rmul=1.95d0
+rmul=1.95d-1
 rmug=1.95d0
-surface_tension=5.5d0
+surface_tension=5.5d0*sigmascale
 
-uwall = 0.25d0
+uwall = 0.25d0*uscale
 l1_a = 2.165d0
 l2_a = l1_a
 theta_0_a = 90.0d0
-zeta_a = 0.21d0 * 6.0d0 * (rmul / l1_a + rmug / l2_a)
+zeta_a = 0.42d0 * 6.0d0 * ( rhol * (rmul / l1_a) + rhog * (rmug / l2_a) ) / ( rhol + rhog )
 
 l1_b = 2.379d0
 l2_b = l1_b * 3.67d0/1.625d0
 theta_0_b = 64.0d0
-zeta_b = 0.21d0 * 6.0d0 * (rmul / l1_b + rmug / l2_b)
+zeta_b = 0.42d0 * 6.0d0 * ( rhol * (rmul / l1_b) + rhog * (rmug / l2_b) ) / ( rhol + rhog )
 
 l1_c = l2_b
 l2_c = l1_b
@@ -191,7 +193,7 @@ theta_0_c = 180.0d0 - theta_0_b
 zeta_c = zeta_b
 
 !pattern width
-period = 1
+period = 16
 ratio_a = 0
 
 !calculation gravity 
@@ -252,7 +254,7 @@ bet_mthinc=2.0d0
 
 tscale  =1.0d0
 !nmax    =12000*nsv/32/tscale/2
-nmax    =12000
+nmax    =120
 idout   =1200000
 imkuvp  =1000000
 imkvtk  =nmax/120
@@ -491,9 +493,9 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-dt=64.0d-2/nsv*tscale*xscale
+!dt=64.0d-2/nsv*tscale*xscale/uscale
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
@@ -761,7 +763,7 @@ if(mod(nstep,imkvtk).eq.0)then
   !enddo
 
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
-  call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
+  !call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
 
   call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
