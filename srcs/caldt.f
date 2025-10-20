@@ -106,7 +106,7 @@ ccc
       dt=min(dt1,dt2)
       dt=min(dt ,dt3)
 
-      time=time+dt
+      !time=time+dt
       if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
       write(*,'("time=",1e17.10," dt=",1e17.10
      &         ," dt_adv=",1e17.10

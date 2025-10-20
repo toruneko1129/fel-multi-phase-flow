@@ -170,7 +170,7 @@ xl=68.0d0*xscale
 yl=13.6d0*xscale
 zl=8.50d0*xscale/32.0d0
 
-rhol=8.1d-1
+rhol=8.1d-2
 rhog=8.1d-1
 rmul=1.95d-1
 rmug=1.95d0
@@ -481,7 +481,7 @@ if(ID.eq.0)then
   write(*,'()')
 endif
 
-call cal_coef_prs(svall(2),rhog,dxinv,dyinv,dzinv,aw_p,ae_p,as_p,an_p,ab_p,at_p,ap_p)
+call cal_coef_prs(svall(2),rhol,dxinv,dyinv,dzinv,aw_p,ae_p,as_p,an_p,ab_p,at_p,ap_p)
 call cal_coef_solp_fft(svall(2),as_p,an_p,as_p_fft,an_p_fft,ap_p_fft)
 
 !ccc
@@ -493,9 +493,9 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-dt=64.0d-2/nsv*tscale*xscale/uscale
+!dt=64.0d-2/nsv*tscale*xscale/uscale
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
@@ -663,7 +663,7 @@ call caldiv(ipara,ndiv,ni,nj,nk,dxinv,dyinv,dzinv,dt,un,vn,wn,div,err_div0)
 call solp_fft_tdma1(ni,nj,nk,fftdata,div,phir_r,phir_i)
 call trans_r2w(ipara,ID,ndiv,svall,key,sendbuf,recvbuf,phir_r,phiw_r)
 call trans_r2w(ipara,ID,ndiv,svall,key,sendbuf,recvbuf,phir_i,phiw_i)
-call solp_fft_tdma2(ID,ndiv,svall,rhog,dxinv,dzinv,as_p_fft,an_p_fft,ap_p_fft,atdma,btdma_r,btdma_i,phiw_r,phiw_i)
+call solp_fft_tdma2(ID,ndiv,svall,rhol,dxinv,dzinv,as_p_fft,an_p_fft,ap_p_fft,atdma,btdma_r,btdma_i,phiw_r,phiw_i)
 call trans_w2r(ipara,ID,ndiv,svall,key,sendbuf,recvbuf,phiw_r,phir_r)
 call trans_w2r(ipara,ID,ndiv,svall,key,sendbuf,recvbuf,phiw_i,phir_i)
 call solp_fft_tdma3(ni,nj,nk,fftdata,phir_r,phir_i,dp)
@@ -671,9 +671,9 @@ call bnd_avzero(ipara,ndiv,ni,nj,nk,dp)
 call bnd_neumann(nID,ni,nj,nk,dp)
 call bnd_periodic(ni,nj,nk,dp)
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,dp)
-call solp_fft_tdma4(ipara,ID,ndiv,ni,nj,nk,nstep,imon_t,rhog,dxinv,dyinv,dzinv,div,dp)
+call solp_fft_tdma4(ipara,ID,ndiv,ni,nj,nk,nstep,imon_t,rhol,dxinv,dyinv,dzinv,div,dp)
 
-call corunp_explicit(nID,ni,nj,nk,rhog,dxinv,dyinv,dzinv,dt,dp,phat,un,vn,wn,pn)
+call corunp_explicit(nID,ni,nj,nk,rhol,dxinv,dyinv,dzinv,dt,dp,phat,un,vn,wn,pn)
 
 call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1_array,l2_array,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,un)
