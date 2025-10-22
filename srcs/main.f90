@@ -98,7 +98,7 @@ nsv=128
 
 svall(1)=nsv*4
 svall(2)=nsv
-svall(3)=2
+svall(3)=64
 
 ! irestart=1 if computation will be restarted (input data are needed).
 ! irestart=0 if computation will be started from t=0.
@@ -168,7 +168,7 @@ sigmascale=2.0d0
 
 xl=68.0d0*xscale
 yl=13.6d0*xscale
-zl=8.50d0*xscale/32.0d0
+zl=8.50d0*xscale
 
 rhol=8.1d-2
 rhog=8.1d-1
@@ -176,21 +176,22 @@ rmul=1.95d-1
 rmug=1.95d0
 surface_tension=5.5d0*sigmascale
 
+!rmu/l is constant
 uwall = 0.25d0*uscale
 l1_a = 2.165d0
-l2_a = l1_a
+l2_a = 2.165d-1
 theta_0_a = 90.0d0
-zeta_a = 0.42d0 * 6.0d0 * ( rhol * (rmul / l1_a) + rhog * (rmug / l2_a) ) / ( rhol + rhog )
+zeta_a = 0.42d0 * 6.0d0 * ( rhog * (rmug / l1_a) + rhol * (rmul / l2_a) ) / ( rhog + rhol )
 
 l1_b = 2.379d0
-l2_b = l1_b * 3.67d0/1.625d0
+l2_b = 5.373d-1
 theta_0_b = 64.0d0
-zeta_b = 0.42d0 * 6.0d0 * ( rhol * (rmul / l1_b) + rhog * (rmug / l2_b) ) / ( rhol + rhog )
+zeta_b = 0.42d0 * 6.0d0 * ( rhog * (rmug / l1_b) + rhol * (rmul / l2_b) ) / ( rhog + rhol )
 
-l1_c = l2_b
-l2_c = l1_b
+l1_c = 5.373d0
+l2_c = 2.379d-1
 theta_0_c = 180.0d0 - theta_0_b
-zeta_c = zeta_b
+zeta_c = 0.42d0 * 6.0d0 * ( rhog * (rmug / l1_c) + rhol * (rmul / l2_c) ) / ( rhog + rhol )
 
 !pattern width
 period = 16
@@ -215,11 +216,11 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array_monotone(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
-call init_array_monotone(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
-call init_array_monotone(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
-call init_array_monotone(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
-call init_array_monotone(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
+call init_array_pt_checker(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
+call init_array_pt_checker(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
+call init_array_pt_checker(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
+call init_array_pt_checker(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
+call init_array_pt_checker(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -254,11 +255,11 @@ bet_mthinc=2.0d0
 
 tscale  =1.0d0
 !nmax    =12000*nsv/32/tscale/2
-nmax    =12000
+nmax    =24000
 idout   =1200000
 imkuvp  =1000000
-imkvtk  =nmax/120
-imon_t  =nmax/120
+imkvtk  =nmax/240
+imon_t  =nmax/240
 ibudget =imon_t
 
 
@@ -275,6 +276,8 @@ write(*,'("nk=                 ",1i9)')nk
 write(*,'("irestart=           ",1i9)')irestart
 write(*,*)
 write(*,'("xscale=             ",20e20.10)')xscale
+write(*,'("uscale=             ",20e20.10)')uscale
+write(*,'("sigmascale=         ",20e20.10)')sigmascale
 write(*,'("xl=                 ",20e20.10)')xl
 write(*,'("yl=                 ",20e20.10)')yl
 write(*,'("zl=                 ",20e20.10)')zl
@@ -493,9 +496,9 @@ write(*,*)'---------------------------------------'
 write(*,'("nstep= ",1i9.9)')nstep
 endif
 
-call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
+!call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-!dt=64.0d-2/nsv*tscale*xscale/uscale
+dt=32.0d-2/nsv*tscale*xscale/uscale
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
@@ -534,7 +537,7 @@ call summation(ni,nj,nk,phin,nbub)
 if(mod(nstep,imon_t).eq.0)then
   dbg=.true.
 else
-  dbg=.true.
+  dbg=.false.
 endif
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,0))
 call gnbc(nID, ni, nj, nk, u, w, uwall, theta_0_array, &
@@ -765,10 +768,9 @@ if(mod(nstep,imkvtk).eq.0)then
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
   !call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
 
-  call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl, theta_array)
   !call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
-  !call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl, delta_x, x_c, .true.)
-  !call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif
 endif

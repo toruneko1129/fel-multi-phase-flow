@@ -44,7 +44,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   
   pi = acos(-1.0d0)
   eps = 1.0d-12
-  dy = 13.6d0 / 128
+  dy = 13.6d2 / 128
   dz = dx
 
   width = 5  ! 接触点近傍の幅（セル数）
@@ -209,14 +209,16 @@ end do
         !  write(*,*) 'theta_M=', theta_t_rad*(180.0d0/pi)
         !endif
 
-        if (dbg .and. (k==nk/2) .and. (i==idn_top(k))) then
+        !if (dbg  .and. (i==idn_top(k))) then
           !write(*,*)  'u=', uwall+u_cl, 'x_c^n=', xdn_top(k) + dy * 2 / tan(theta_array(i, nj, k)*(pi/180.0d0)) - 51.0d2
           !x_c = xdn_top(k) + dy * 2 / tan(theta_array(i, nj, k)*(pi/180.0d0)) - 51.0d0
           !write(*,*)  'u=', uwall+u_cl, 'x_c^n=', xdn_top(k) - 51.0d2
           !write(*,*)  'u=', (uk(mi,nj,k) + uk(i,nj,k))*0.5d0
           !delta_x = (uwall+u_cl)*0.25d0
           !x_c = xdn_top(k) + dy * 2 / tan(theta_array(i, nj, k)*(pi/180.0d0)) - 51.0d2
-        endif
+          !write(*,*) 'z=', (k - 0.5d0) * dz
+          !write(*,*) 'theta_M=', theta_t_rad*(180.0d0/pi)
+        !endif
 
         theta_array(i, nj, k) = theta_t
         !theta_array(i, nj, k) = theta_0_array(i, nj, k)
