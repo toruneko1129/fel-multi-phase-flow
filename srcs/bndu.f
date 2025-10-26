@@ -3,7 +3,7 @@ ccc<impose boundary conditions on the velocity components uk,vk,wk
 ccc<localised naier slip
 ccc<l1, l2: slip length of fluid[1,2]
 ccc
-      subroutine bndu(nID,ni,nj,nk,uk,vk,wk,uwall,dy,l1,l2,phi)
+      subroutine bndu(nID,ni,nj,nk,uk,vk,wk,uwall,dy,l1,l2,phi,mu1,mu2)
 
       implicit none
       include 'param.h'
@@ -18,8 +18,9 @@ ccc
       real*8    phi(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    inv_ls1, inv_ls2
       real*8    phi_av, ls, coef1, coef2, eps
+      real*8    mu1,mu2,mu_mix,beta_mix
 
-      integer i,j,k
+      integer i,j,k,ip,kp
 
 ccc
 ccc<j
@@ -32,16 +33,20 @@ ccc
 !$OMP  PARALLEL DO
 !$OMP$ SCHEDULE(static,1)
 !$OMP$ DEFAULT(none)
-!$OMP$ PRIVATE(i,k)
+!$OMP$ PRIVATE(i,k,ip,kp)
 !$OMP$ PRIVATE(phi_av,inv_ls1,inv_ls2,ls,coef1,coef2)
 !$OMP$ SHARED(ni,nk)
 !$OMP$ SHARED(uk,vk,wk,phi,uwall,dy,l1,l2,eps)
       do k=1,nk
       do i=1,ni
-      phi_av = (phi(i,1,k) + phi(mod(i+1,ni+3),1,k))/2.0d0
-      inv_ls1 = phi_av / (l1(i,1,k)+eps)
-      inv_ls2 = (1.d0 - phi_av) / (l2(i,1,k)+eps)
-      ls = 1.d0 / (inv_ls1 + inv_ls2+eps)
+
+      ip = i + 1
+      if (ip .gt. ni) ip = 1
+      kp = k + 1
+      if (kp .gt. nk) kp = 1
+
+      phi_av = (phi(i,1,k) + phi(ip,1,k))/2.0d0
+      ls = (0.9d0*phi_av + 0.1d0) * l1(i,1,k)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
@@ -53,6 +58,12 @@ ccc
       vk(i,  -2,k)=-vk(i,   2,k)
       vk(i,  -1,k)=-vk(i,   1,k)
       vk(i,   0,k)=0.0d0
+
+      phi_av = (phi(i,1,k) + phi(i,1,kp))/2.0d0
+      ls = (0.9d0*phi_av + 0.1d0) * l1(i,1,k)
+
+      coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
+      coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
 
       wk(i,   0,k) = coef2 * wk(i,   1,k)
       wk(i,  -1,k) = 2.d0 * wk(i,   0,k) - wk(i,   1,k)
@@ -66,16 +77,20 @@ ccc
 !$OMP  PARALLEL DO
 !$OMP$ SCHEDULE(static,1)
 !$OMP$ DEFAULT(none)
-!$OMP$ PRIVATE(i,k)
+!$OMP$ PRIVATE(i,k,ip,kp)
 !$OMP$ PRIVATE(phi_av,inv_ls1,inv_ls2,ls,coef1,coef2)
 !$OMP$ SHARED(ni,nj,nk)
 !$OMP$ SHARED(uk,vk,wk,phi,uwall,dy,l1,l2,eps)
       do k=1,nk
       do i=1,ni
-      phi_av = (phi(i,nj,k) + phi(mod(i+1,ni+3),nj,k))/2.0d0
-      inv_ls1 = phi_av / (l1(i,nj,k)+eps)
-      inv_ls2 = (1.d0 - phi_av) / (l2(i,nj,k)+eps)
-      ls = 1.d0 / (inv_ls1 + inv_ls2 + eps)
+
+      ip = i + 1
+      if (ip .gt. ni) ip = 1
+      kp = k + 1
+      if (kp .gt. nk) kp = 1
+
+      phi_av = (phi(i,nj,k) + phi(ip,nj,k))/2.0d0
+      ls = (0.9d0*phi_av + 0.1d0) * l1(i,nj,k)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
@@ -88,6 +103,12 @@ ccc
       vk(i,nj+1,k)=-vk(i,nj-1,k)
       vk(i,nj+2,k)=-vk(i,nj-2,k)
       vk(i,nj+3,k)=-vk(i,nj-3,k)
+
+      phi_av = (phi(i,nj,k) + phi(i,nj,kp))/2.0d0
+      ls = (0.9d0*phi_av + 0.1d0) * l1(i,nj,k)
+
+      coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
+      coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
 
       wk(i,nj+1,k) = coef2 * wk(i,nj  ,k)
       wk(i,nj+2,k) = 2.d0 * wk(i,nj+1,k) - wk(i,nj  ,k)

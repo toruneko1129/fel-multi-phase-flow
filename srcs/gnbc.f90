@@ -1,7 +1,7 @@
 !cox-voinov law
 !>>>1.116d0 or 3.420d0
 subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
-                surface_tension, zeta_array, theta_array, dx, phi, dbg, delta_x, x_c, rmu)
+                surface_tension, zeta_array, theta_array, dx, dz, phi, dbg, delta_x, x_c, rmu, cox)
 
   implicit none
   include 'param.h'
@@ -44,15 +44,13 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   
   pi = acos(-1.0d0)
   eps = 1.0d-12
-  dy = 13.6d2 / 128
-  dz = dx
+  dy = 13.6d0 / 128
 
   width = 5  ! 接触点近傍の幅（セル数）
   alpha = 1.0d0
   coeff = 0.917d0 * 1.95d0 * uwall / surface_tension
   tol = 1.0d-10
   itmax = 100
-  cox = 1.116d0
   gmin = cox_voinov_lambda01(30.d0*pi/180.d0)
   gmax = cox_voinov_lambda01(150.d0*pi/180.d0)
 
@@ -113,8 +111,13 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         !cox-voinov law
         !fix theta_t_rad to theta_0_rad -> No GNBC
         !theta_t_rad = theta_0_rad
-        g_micro = cox_voinov_lambda01(theta_t_rad)    
-        g_macro = g_micro + (cox * rmu(i,1,k) * u_cl / surface_tension)
+        g_micro = cox_voinov_lambda01(theta_t_rad)
+        if (i < ni/2) then
+          g_macro = g_micro - (cox * 1.95d0 * uwall / surface_tension)
+        else
+          g_macro = g_micro + (cox * 1.95d0 * uwall / surface_tension)
+        end if
+        g_macro = g_micro + (cox * 1.95d0 * u_cl / surface_tension)
         g_macro = max(gmin, min(gmax, g_macro))
         theta_t_rad = cox_voinov_inverse_lambda01(theta_array(i,1,k)*(pi/180.0d0), g_macro, 30.0d0, 150.0d0, tol, itmax)
 
@@ -198,7 +201,11 @@ end do
         !fix theta_t_rad to theta_0_rad -> No GNBC
         !theta_t_rad = theta_0_rad
         g_micro = cox_voinov_lambda01(theta_t_rad)    
-        g_macro = g_micro + (cox * rmu(i,nj,k) * u_cl / surface_tension)
+        if (i < ni/2) then
+          g_macro = g_micro + (cox * 1.95d0 * uwall / surface_tension)
+        else
+          g_macro = g_micro - (cox * 1.95d0 * uwall / surface_tension)
+        end if
         g_macro = max(gmin, min(gmax, g_macro))
         theta_t_rad = cox_voinov_inverse_lambda01(theta_array(i,nj,k)*(pi/180.0d0), g_macro, 30.0d0, 150.0d0, tol, itmax)
 

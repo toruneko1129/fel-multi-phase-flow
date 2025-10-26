@@ -10,7 +10,7 @@ bnd_dirichlet.f                  \
 bnd_comm.f			 \
 bnd_neumann.f			 \
 bnd_periodic.f			 \
-bndu.f				 \
+bndu.f                   \
 cal_advu.f			 \
 cal_advu_weno5.f		 \
 cal_arith_coef_vis.f		 \
