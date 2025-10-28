@@ -46,7 +46,8 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   eps = 1.0d-12
   dy = 13.6d0 / 128
 
-  width = 5  ! 接触点近傍の幅（セル数）
+  !width=3が界面幅を考えた時に適切そう．
+  width = 3 ! 接触点近傍の幅（セル数）
   alpha = 1.0d0
   coeff = 0.917d0 * 1.95d0 * uwall / surface_tension
   tol = 1.0d-10
@@ -117,7 +118,6 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         else
           g_macro = g_micro + (cox * 1.95d0 * uwall / surface_tension)
         end if
-        g_macro = g_micro + (cox * 1.95d0 * u_cl / surface_tension)
         g_macro = max(gmin, min(gmax, g_macro))
         theta_t_rad = cox_voinov_inverse_lambda01(theta_array(i,1,k)*(pi/180.0d0), g_macro, 30.0d0, 150.0d0, tol, itmax)
 

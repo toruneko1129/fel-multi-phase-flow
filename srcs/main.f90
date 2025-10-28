@@ -162,10 +162,10 @@ pi=atan(1.0d0)*4.0d0
 ! theta_0: static contact angle at the wall[deg]
 
 !!!!
-xscale=4.0d0
-uscale=0.8d0
+xscale=1.0d0
+uscale=1.0d0
 sigmascale=2.0d0
-cox = 2.503d0
+cox = 1.117d0
 lscale = 1.0d-2
 
 xl=68.0d0*xscale
