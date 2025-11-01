@@ -91,6 +91,7 @@ find_interface_positions.f90 \
 find_interface_positions_angle.f90 \
 find_two_contacts_on_wall.f90 \
 find_two_contacts_on_wall_index.f90 \
+mkvtk_velocity.f90     \
 main.f90            \
 
 SRCS	=	$(addprefix $(SRCDIR)/, $(F90SRCS)) \

@@ -46,8 +46,8 @@
       do i=0,mi+1
 !      q(i,j,   0)=1.0d0
 !      q(i,j,mk+1)=1.0d0
-      q(i,j,   0)=q(i,j, 1)
-      q(i,j,mk+1)=q(i,j,mk)
+      q(i,j,   0)=q(i,j,mk)
+      q(i,j,mk+1)=q(i,j,1 )
       enddo
       enddo
 !$OMP  END PARALLEL DO

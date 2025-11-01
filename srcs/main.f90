@@ -465,7 +465,8 @@ if(ID.eq.0)then
   !call mkvtk_phil(svall,nstep,dx,dy,dz,phil_all(-2,-2,-2,l),l)
   !enddo
   call mkvtk_phi(svall,nstep,dx,dy,dz,phi_all)
-  call mkvtk_p(svall,nstep,dx,dy,dz,p_all)
+  call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
+  !call mkvtk_p(svall,nstep,dx,dy,dz,p_all)
   !call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   do l=1,nbub
   center(1)= xxc(l)
@@ -716,6 +717,9 @@ if(mod(nstep,imon_t).eq.0)then
      ,err_div &
      ,err_div0
    endif
+  call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl, theta_array)
+  call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  !call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
 endif
 
 call cpy(ni,nj,nk,u   ,uo  )
@@ -770,11 +774,9 @@ if(mod(nstep,imkvtk).eq.0)then
   !enddo
 
   call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
+  call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
   !call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
 
-  call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl, theta_array)
-  call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
-  !call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   endif
 endif
