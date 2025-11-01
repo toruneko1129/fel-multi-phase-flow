@@ -111,12 +111,12 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         
         !cox-voinov law
         !fix theta_t_rad to theta_0_rad -> No GNBC
-        !theta_t_rad = theta_0_rad
+        theta_t_rad = theta_0_rad
         g_micro = cox_voinov_lambda01(theta_t_rad)
-        if (i < ni/2) then
-          g_macro = g_micro - (cox * 1.95d0 * uwall / surface_tension)
+        if (abs(i - idn_bot(k)) <= width) then
+          g_macro = g_micro - (cox * 1.95d0 * u_cl / surface_tension)
         else
-          g_macro = g_micro + (cox * 1.95d0 * uwall / surface_tension)
+          g_macro = g_micro + (cox * 1.95d0 * u_cl / surface_tension)
         end if
         g_macro = max(gmin, min(gmax, g_macro))
         theta_t_rad = cox_voinov_inverse_lambda01(theta_array(i,1,k)*(pi/180.0d0), g_macro, 30.0d0, 150.0d0, tol, itmax)
@@ -199,12 +199,12 @@ end do
         
         !cox-voinov law
         !fix theta_t_rad to theta_0_rad -> No GNBC
-        !theta_t_rad = theta_0_rad
+        theta_t_rad = theta_0_rad
         g_micro = cox_voinov_lambda01(theta_t_rad)    
-        if (i < ni/2) then
-          g_macro = g_micro + (cox * 1.95d0 * uwall / surface_tension)
+        if (abs(i - idn_top(k)) <= width) then
+          g_macro = g_micro + (cox * 1.95d0 * u_cl / surface_tension)
         else
-          g_macro = g_micro - (cox * 1.95d0 * uwall / surface_tension)
+          g_macro = g_micro - (cox * 1.95d0 * u_cl / surface_tension)
         end if
         g_macro = max(gmin, min(gmax, g_macro))
         theta_t_rad = cox_voinov_inverse_lambda01(theta_array(i,nj,k)*(pi/180.0d0), g_macro, 30.0d0, 150.0d0, tol, itmax)
