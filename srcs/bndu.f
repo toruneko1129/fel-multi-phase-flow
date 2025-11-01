@@ -3,7 +3,7 @@ ccc<impose boundary conditions on the velocity components uk,vk,wk
 ccc<localised naier slip
 ccc<l1, l2: slip length of fluid[1,2]
 ccc
-      subroutine bndu(nID,ni,nj,nk,uk,vk,wk,uwall,dy,l1,l2,phi,mu1,mu2)
+      subroutine bndu(nID,ni,nj,nk,uk,vk,wk,u_top,u_bot,dy,l1,l2,phi)
 
       implicit none
       include 'param.h'
@@ -12,13 +12,12 @@ ccc
       real*8    uk(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    vk(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    wk(-2:ni+3,-2:nj+3,-2:nk+3)
-      real*8    uwall,dy
+      real*8    u_top,u_bot,dy
       real*8    l1(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    l2(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    phi(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8    inv_ls1, inv_ls2
       real*8    phi_av, ls, coef1, coef2, eps
-      real*8    mu1,mu2,mu_mix,beta_mix
 
       integer i,j,k,ip,kp
 
@@ -36,7 +35,7 @@ ccc
 !$OMP$ PRIVATE(i,k,ip,kp)
 !$OMP$ PRIVATE(phi_av,inv_ls1,inv_ls2,ls,coef1,coef2)
 !$OMP$ SHARED(ni,nk)
-!$OMP$ SHARED(uk,vk,wk,phi,uwall,dy,l1,l2,eps)
+!$OMP$ SHARED(uk,vk,wk,phi,u_bot,dy,l1,l2,eps)
       do k=1,nk
       do i=1,ni
 
@@ -46,12 +45,14 @@ ccc
       if (kp .gt. nk) kp = 1
 
       phi_av = (phi(i,1,k) + phi(ip,1,k))/2.0d0
-      ls = (0.9d0*phi_av + 0.1d0) * l1(i,1,k)
+      inv_ls1 = phi_av / (l1(i,1,k)+eps)
+      inv_ls2 = (1.d0 - phi_av) / (l2(i,1,k)+eps)
+      ls = 1.d0 / (inv_ls1 + inv_ls2+eps)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
 
-      uk(i,   0,k) = coef1 * (-uwall) + coef2 * uk(i,   1,k)
+      uk(i,   0,k) = coef1 * u_bot + coef2 * uk(i,   1,k)
       uk(i,  -1,k) = 2.d0 * uk(i,   0,k) - uk(i,   1,k)
       uk(i,  -2,k) = 2.d0 * uk(i,  -1,k) - uk(i,   0,k)
 
@@ -60,7 +61,9 @@ ccc
       vk(i,   0,k)=0.0d0
 
       phi_av = (phi(i,1,k) + phi(i,1,kp))/2.0d0
-      ls = (0.9d0*phi_av + 0.1d0) * l1(i,1,k)
+      inv_ls1 = phi_av / (l1(i,1,k)+eps)
+      inv_ls2 = (1.d0 - phi_av) / (l2(i,1,k)+eps)
+      ls = 1.d0 / (inv_ls1 + inv_ls2+eps)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
@@ -80,7 +83,7 @@ ccc
 !$OMP$ PRIVATE(i,k,ip,kp)
 !$OMP$ PRIVATE(phi_av,inv_ls1,inv_ls2,ls,coef1,coef2)
 !$OMP$ SHARED(ni,nj,nk)
-!$OMP$ SHARED(uk,vk,wk,phi,uwall,dy,l1,l2,eps)
+!$OMP$ SHARED(uk,vk,wk,phi,u_top,dy,l1,l2,eps)
       do k=1,nk
       do i=1,ni
 
@@ -90,12 +93,14 @@ ccc
       if (kp .gt. nk) kp = 1
 
       phi_av = (phi(i,nj,k) + phi(ip,nj,k))/2.0d0
-      ls = (0.9d0*phi_av + 0.1d0) * l1(i,nj,k)
+      inv_ls1 = phi_av / (l1(i,nj,k)+eps)
+      inv_ls2 = (1.d0 - phi_av) / (l2(i,nj,k)+eps)
+      ls = 1.d0 / (inv_ls1 + inv_ls2+eps)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
 
-      uk(i,nj+1,k) = coef1 * uwall + coef2 * uk(i,nj  ,k)
+      uk(i,nj+1,k) = coef1 * u_top + coef2 * uk(i,nj  ,k)
       uk(i,nj+2,k) = 2.d0 * uk(i,nj+1,k) - uk(i,nj  ,k)
       uk(i,nj+3,k) = 2.d0 * uk(i,nj+2,k) - uk(i,nj+1,k)
 
@@ -105,7 +110,9 @@ ccc
       vk(i,nj+3,k)=-vk(i,nj-3,k)
 
       phi_av = (phi(i,nj,k) + phi(i,nj,kp))/2.0d0
-      ls = (0.9d0*phi_av + 0.1d0) * l1(i,nj,k)
+      inv_ls1 = phi_av / (l1(i,nj,k)+eps)
+      inv_ls2 = (1.d0 - phi_av) / (l2(i,nj,k)+eps)
+      ls = 1.d0 / (inv_ls1 + inv_ls2+eps)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)

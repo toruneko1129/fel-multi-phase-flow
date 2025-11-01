@@ -1,6 +1,6 @@
 !cox-voinov law
 !>>>1.116d0 or 3.420d0
-subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
+subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall_top, uwall_bot, theta_0_array, &
                 surface_tension, zeta_array, theta_array, dx, dz, phi, dbg, delta_x, x_c, rmu, cox)
 
   implicit none
@@ -10,7 +10,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   integer ni,nj,nk
   real*8  uk(-2:ni+3,-2:nj+3,-2:nk+3)
   real*8  wk(-2:ni+3,-2:nj+3,-2:nk+3)
-  real*8  uwall, surface_tension, dx, dy
+  real*8  uwall_top, uwall_bot, surface_tension, dx, dy
   real*8  zeta_array(-2:ni+3,-2:nj+3,-2:nk+3)
   real*8  theta_0_array(-2:ni+3,-2:nj+3,-2:nk+3)
   real*8  theta_array(-2:ni+3,-2:nj+3,-2:nk+3)
@@ -49,7 +49,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   !width=3が界面幅を考えた時に適切そう．
   width = 3 ! 接触点近傍の幅（セル数）
   alpha = 1.0d0
-  coeff = 0.917d0 * 1.95d0 * uwall / surface_tension
+  !coeff = 0.917d0 * 1.95d0 * uwall / surface_tension
   tol = 1.0d-10
   itmax = 100
   gmin = cox_voinov_lambda01(30.d0*pi/180.d0)
@@ -65,7 +65,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
   !--- Y−面（j=1）---
   if(nID(Y_MINUS).lt.0)then
 !$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t, is_band, cos_old, g_micro, g_macro, nine_g, nwx, nwz, dphidx, dphidz, normxz, ip, im, kp, km) &
-!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz, cox, gmin, gmax, rmu)
+!$OMP& SHARED(ni,nj,nk,uk,wk,uwall_bot,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz, cox, gmin, gmax, rmu)
     do k=-2,nk+3
       do i=-2,ni+3
         ! ---- 接触点近傍（±width）チェック：該当しなければスキップ ----
@@ -81,7 +81,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall, theta_0_array, &
         mi = mod(i+ni+2, ni+3)
 
         !--- 接触線速度 x成分 ---
-        u_cl_x = (uk(mi,0,k) + uk(mi,1,k) + uk(i,0,k) + uk(i,1,k))/4.0d0 + uwall
+        u_cl_x = (uk(mi,0,k) + uk(mi,1,k) + uk(i,0,k) + uk(i,1,k))/4.0d0 - uwall_bot
 
         !--- 接触線速度 z成分 ---
         u_cl_z = (wk(i,0,k) + wk(i,1,k))/2.0d0
@@ -148,7 +148,7 @@ end do
   !--- Y＋面（j=nj）---
   if(nID(Y_PLUS).lt.0)then
 !$OMP  PARALLEL DO PRIVATE(i,k,mi,u_cl_x,u_cl_z,u_cl,theta_0_rad,cos_theta_0,cos_theta_t,theta_t_rad,theta_t, is_band, cos_old, g_micro, g_macro, nine_g, nwx, nwz, dphidx, dphidz, normxz, ip, im, kp, km) &
-!$OMP& SHARED(ni,nj,nk,uk,wk,uwall,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz, cox, gmin, gmax, rmu)
+!$OMP& SHARED(ni,nj,nk,uk,wk,uwall_top,theta_0_array,surface_tension,zeta_array,theta_array,pi,eps, iup_bot,idn_bot,hup_bot,hdn_bot, width, alpha, tol, itmax, dx, dz, cox, gmin, gmax, rmu)
     do k=-2,nk+3
       do i=-2,ni+3
         ! ---- 接触点近傍（±width）チェック：該当しなければスキップ ----
@@ -164,7 +164,7 @@ end do
         mi = mod(i+ni+2, ni+3)
 
         !--- 接触線速度 x成分 ---
-        u_cl_x = (uk(mi,nj,k) + uk(mi,nj+1,k) + uk(i,nj,k) + uk(i,nj+1,k))/4.0d0 - uwall
+        u_cl_x = (uk(mi,nj,k) + uk(mi,nj+1,k) + uk(i,nj,k) + uk(i,nj+1,k))/4.0d0 - uwall_top
 
         !--- 接触線速度 z成分 ---
         u_cl_z = (wk(i,nj,k) + wk(i,nj+1,k))/2.0d0

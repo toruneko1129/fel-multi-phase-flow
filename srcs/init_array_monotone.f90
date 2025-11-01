@@ -24,7 +24,7 @@ subroutine init_array_monotone(ni,nj,nk,q_a,q_b,q_c,q_array,period,ratio_a)
     do i = -2, ni+3
       ! 下側境界
       q_array(i, 1, k) = q_a
-      q_array(i, nj, k) = q_b
+      q_array(i, nj, k) = q_a
     end do
   end do
   !$OMP END PARALLEL DO

@@ -14,7 +14,7 @@
      & , aw_b_w, aw_t_w, aw_p_w
      & ,au_bw_w,au_tw_w,au_be_w,au_te_w
      & ,av_bs_w,av_ts_w,av_bn_w,av_tn_w
-     & ,src_u,src_v,src_w,un,vn,wn,uwall,dy,l1,l2,phi,mug,mul)
+     & ,src_u,src_v,src_w,un,vn,wn,u_top,u_bot,dy,l1,l2,phi)
 
       implicit none
       include 'mpif.h'
@@ -79,7 +79,7 @@
       real*8      un(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8      vn(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8      wn(-2:ni+3,-2:nj+3,-2:nk+3)
-      real*8 uwall,dy
+      real*8 u_top,u_bot,dy
       real*8 l1(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8 l2(-2:ni+3,-2:nj+3,-2:nk+3)
       real*8 phi(-2:ni+3,-2:nj+3,-2:nk+3)
@@ -90,7 +90,6 @@
       integer isor(8),jsor(8),ksor(8)
       real*8 dtinv,rho00
       real*8 err,err0,du,dv,dw,visn
-      real*8 mug,mul
 
       isor(1)=1
       jsor(1)=1
@@ -144,7 +143,6 @@ cc
 !$OMP$ SHARED(av_ws_u,av_es_u,av_wn_u,av_en_u)
 !$OMP$ SHARED(aw_wb_u,aw_eb_u,aw_wt_u,aw_et_u)
 !$OMP$ SHARED(un,vn,wn,src_u,dtinv)
-!$OMP$ SHARED(mug,mul)
 !$OMP$ REDUCTION(+:err)
       do k=ksor(lsor4),nk,2
       do j=jsor(lsor4),nj,2
@@ -176,7 +174,7 @@ cc
       enddo
 !$OMP  END PARALLEL DO
       if(mod(lsor4,2).eq.0)then
-      call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1,l2,phi,mug,mul)
+      call bndu(nID,ni,nj,nk,un,vn,wn,u_top,u_bot,dy,l1,l2,phi)
       call bnd_periodic(ni,nj,nk,un)
       call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,un)
       endif
@@ -195,7 +193,6 @@ cc
 !$OMP$ SHARED(au_sw_v,au_nw_v,au_se_v,au_ne_v)
 !$OMP$ SHARED(aw_sb_v,aw_nb_v,aw_st_v,aw_nt_v)
 !$OMP$ SHARED(un,vn,wn,src_v,dtinv)
-!$OMP$ SHARED(mug,mul)
 !$OMP$ REDUCTION(+:err)
       do k=ksor(lsor4),nk ,2
       do j=jsor(lsor4),jen,2
@@ -227,7 +224,7 @@ cc
       enddo
 !$OMP  END PARALLEL DO
       if(mod(lsor4,2).eq.0)then
-      call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1,l2,phi,mug,mul)
+      call bndu(nID,ni,nj,nk,un,vn,wn,u_top,u_bot,dy,l1,l2,phi)
       call bnd_periodic(ni,nj,nk,vn)
       call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,vn)
       endif
@@ -246,7 +243,6 @@ cc
 !$OMP$ SHARED(au_bw_w,au_tw_w,au_be_w,au_te_w)
 !$OMP$ SHARED(av_bs_w,av_ts_w,av_bn_w,av_tn_w)
 !$OMP$ SHARED(un,vn,wn,src_w,dtinv)
-!$OMP$ SHARED(mug,mul)
 !$OMP$ REDUCTION(+:err)
       do k=ksor(lsor4),nk,2
       do j=jsor(lsor4),nj,2
@@ -278,7 +274,7 @@ cc
       enddo
 !$OMP  END PARALLEL DO
       if(mod(lsor4,2).eq.0)then
-      call bndu(nID,ni,nj,nk,un,vn,wn,uwall,dy,l1,l2,phi,mug,mul)
+      call bndu(nID,ni,nj,nk,un,vn,wn,u_top,u_bot,dy,l1,l2,phi)
       call bnd_periodic(ni,nj,nk,wn)
       call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,wn)
       endif
