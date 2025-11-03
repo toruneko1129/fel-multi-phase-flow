@@ -3,7 +3,7 @@
 #PJM -L node=2x2x2
 #PJM --mpi proc=1
 #PJM --omp thread=16
-#PJM -L elapse=06:00:00
+#PJM -L elapse=12:00:00
 #PJM -g go20
 #PJM -j
 
