@@ -180,7 +180,7 @@ rmug=1.95d0
 surface_tension=5.5d0*sigmascale
 
 !rmu/l is constant
-uwall = -0.25d0*uscale
+uwall = 0.25d0*uscale
 
 !x, checker:
 uwall_top = 0.0d0
@@ -205,7 +205,7 @@ theta_0_c = 180.0d0 - theta_0_b
 zeta_c = lscale * 0.42d0 * 6.0d0 * ( rhog * (rmug / l1_c) + rhol * (rmul / l2_c) ) / ( rhog + rhol )
 
 !pattern width
-period = 4
+period = 8
 ratio_a = 0
 
 !calculation gravity 
@@ -227,11 +227,11 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array_z_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
-call init_array_z_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
-call init_array_z_stripe(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
-call init_array_z_stripe(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
-call init_array_z_stripe(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
+call init_array_x_stripe(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -475,8 +475,15 @@ if(ID.eq.0)then
   !do l=1,nbub
   !call mkvtk_phil(svall,nstep,dx,dy,dz,phil_all(-2,-2,-2,l),l)
   !enddo
-  call mkvtk_phi(svall,nstep,dx,dy,dz,phi_all)
-  call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
+
+  !entire
+  !call mkvtk_phi(svall,nstep,dx,dy,dz,phi_all)
+  !call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
+
+  !wall only
+  call mkvtk_phi_nj(svall,nstep,dx,dy,dz,phi_all)
+  call mkvtk_velocity_nj(svall,nstep,dx,dy,dz, u,v,w)
+
   !call mkvtk_p(svall,nstep,dx,dy,dz,p_all)
   !call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   do l=1,nbub
@@ -781,8 +788,14 @@ if(mod(nstep,imkvtk).eq.0)then
   !call mkvtk_phil(svall,nstep,dx,dy,dz,phil_all(-2,-2,-2,l),l)
   !enddo
 
-  call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
-  call mkvtk_phi(svall,nstep,dx,dy,dz, phi_all)
+  !entire
+  !call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
+  !call mkvtk_phi(svall,nstep,dx,dy,dz,phi_all)
+
+  !wall only
+  call mkvtk_velocity_nj(svall,nstep,dx,dy,dz, u,v,w)
+  call mkvtk_phi_nj(svall,nstep,dx,dy,dz,phi_all)
+
   !call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
 
   !  call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)

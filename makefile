@@ -52,6 +52,7 @@ mk_slice_k.f			 \
 mk_slice_j.f                     \
 mk_vel.f                         \
 mkvtk_phi.f			 \
+mkvtk_phi_nj.f			 \
 mkvtk_phil.f                      \
 mkvtk_q.f			 \
 mkvtk_p.f                        \
@@ -92,6 +93,7 @@ find_interface_positions_angle.f90 \
 find_two_contacts_on_wall.f90 \
 find_two_contacts_on_wall_index.f90 \
 mkvtk_velocity.f90     \
+mkvtk_velocity_nj.f90     \
 main.f90            \
 
 SRCS	=	$(addprefix $(SRCDIR)/, $(F90SRCS)) \
