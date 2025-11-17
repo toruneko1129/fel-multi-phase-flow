@@ -99,7 +99,7 @@ nsv=128
 
 svall(1)=nsv*4
 svall(2)=nsv
-svall(3)=64
+svall(3)=2
 
 ! irestart=1 if computation will be restarted (input data are needed).
 ! irestart=0 if computation will be started from t=0.
@@ -171,7 +171,7 @@ lscale = 1.0d-2
 
 xl=68.0d0*xscale
 yl=13.6d0*xscale
-zl=8.50d0*xscale
+zl=8.50d0*xscale/32.0d0
 
 rhol=8.1d-2
 rhog=8.1d-1
@@ -205,7 +205,7 @@ theta_0_c = 180.0d0 - theta_0_b
 zeta_c = lscale * 0.42d0 * 6.0d0 * ( rhog * (rmug / l1_c) + rhol * (rmul / l2_c) ) / ( rhog + rhol )
 
 !pattern width
-period = 8
+period = 4
 ratio_a = 0
 
 !calculation gravity 
@@ -227,11 +227,11 @@ dz=zl/dble(svall(3))
 include'allocate.h'
 
 !init static contact angle at the wall
-call init_array_x_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
-call init_array_x_stripe(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
-call init_array_x_stripe(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
-call init_array_x_stripe(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
-call init_array_x_stripe(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_0_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,theta_0_a,theta_0_b,theta_0_c,theta_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,l1_a,l1_b,l1_c,l1_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,l2_a,l2_b,l2_c,l2_array,period,ratio_a)
+call init_array_monotone(ni,nj,nk,zeta_a,zeta_b,zeta_c,zeta_array,period,ratio_a)
 
 dxinv=1.0d0/dx
 dyinv=1.0d0/dy
@@ -266,11 +266,11 @@ bet_mthinc=2.0d0
 
 tscale  =1.0d0
 !nmax    =12000*nsv/32/tscale/2
-nmax    =12000*nsv/128
+nmax    =24000*nsv/128
 idout   =1200000
 imkuvp  =1000000
-imkvtk  =nmax/120
-imon_t  =nmax/120
+imkvtk  =nmax/240
+imon_t  =nmax/240
 ibudget =imon_t
 
 
@@ -478,12 +478,13 @@ if(ID.eq.0)then
 
   !entire
   !call mkvtk_phi(svall,nstep,dx,dy,dz,phi_all)
-  !call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
+  call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
 
   !wall only
-  call mkvtk_phi_nj(svall,nstep,dx,dy,dz,phi_all)
-  call mkvtk_velocity_nj(svall,nstep,dx,dy,dz, u,v,w)
+  !call mkvtk_phi_nj(svall,nstep,dx,dy,dz,phi_all)
+  !call mkvtk_velocity_nj(svall,nstep,dx,dy,dz, u,v,w)
 
+  call mkvtk_phi_cell(svall,nstep,dx,dy,dz,phi_all)
   !call mkvtk_p(svall,nstep,dx,dy,dz,p_all)
   !call   mkvtk_q(svall,nstep,dx,dy,dz,vorx_all,q_all)
   do l=1,nbub
@@ -789,12 +790,14 @@ if(mod(nstep,imkvtk).eq.0)then
   !enddo
 
   !entire
-  !call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
+  call mkvtk_velocity(svall,nstep,dx,dy,dz, u,v,w)
   !call mkvtk_phi(svall,nstep,dx,dy,dz,phi_all)
 
   !wall only
-  call mkvtk_velocity_nj(svall,nstep,dx,dy,dz, u,v,w)
-  call mkvtk_phi_nj(svall,nstep,dx,dy,dz,phi_all)
+  !call mkvtk_velocity_nj(svall,nstep,dx,dy,dz, u,v,w)
+  !call mkvtk_phi_nj(svall,nstep,dx,dy,dz,phi_all)
+
+  call mkvtk_phi_cell(svall,nstep,dx,dy,dz,phi_all)
 
   !call mkvtk_p(svall,nstep,dx,dy,dz,   p_all)
 
@@ -806,6 +809,7 @@ if(mod(nstep,imon_t).eq.0)then
   call find_interface_positions_upper(ni, nj, nk, phi_all, dx, dy, dz, xl, theta_array)
   call find_interface_positions(ni, nj, nk, phi_all, dx, dy, dz, xl)
   !call find_interface_positions_lower(ni, nj, nk, phi_all, dx, dy, dz, xl)
+  !call find_column_center(ni, nj, nk, phi_all, dx, dy, dz, xl)
 endif
 
 

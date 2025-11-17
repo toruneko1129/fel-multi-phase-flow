@@ -86,6 +86,7 @@ init_array_pt_same.f90 \
 init_array_pt_ratio.f90 \
 init_array_x_stripe.f90 \
 init_array_z_stripe.f90 \
+find_column_center.f90 \
 find_interface_positions_lower.f90 \
 find_interface_positions_upper.f90 \
 find_interface_positions.f90 \
@@ -94,6 +95,7 @@ find_two_contacts_on_wall.f90 \
 find_two_contacts_on_wall_index.f90 \
 mkvtk_velocity.f90     \
 mkvtk_velocity_nj.f90     \
+mkvtk_phi_cell.f90 \
 main.f90            \
 
 SRCS	=	$(addprefix $(SRCDIR)/, $(F90SRCS)) \

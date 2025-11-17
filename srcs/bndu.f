@@ -48,6 +48,8 @@ ccc
       inv_ls1 = phi_av / (l1(i,1,k)+eps)
       inv_ls2 = (1.d0 - phi_av) / (l2(i,1,k)+eps)
       ls = 1.d0 / (inv_ls1 + inv_ls2+eps)
+      !>debug noslip
+      ls = l1(i,1,k)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
@@ -64,6 +66,8 @@ ccc
       inv_ls1 = phi_av / (l1(i,1,k)+eps)
       inv_ls2 = (1.d0 - phi_av) / (l2(i,1,k)+eps)
       ls = 1.d0 / (inv_ls1 + inv_ls2+eps)
+      !>debug noslip
+      ls = l1(i,1,k)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
@@ -96,6 +100,8 @@ ccc
       inv_ls1 = phi_av / (l1(i,nj,k)+eps)
       inv_ls2 = (1.d0 - phi_av) / (l2(i,nj,k)+eps)
       ls = 1.d0 / (inv_ls1 + inv_ls2+eps)
+      !>debug noslip
+      ls = l1(i,nj,k)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
@@ -113,6 +119,8 @@ ccc
       inv_ls1 = phi_av / (l1(i,nj,k)+eps)
       inv_ls2 = (1.d0 - phi_av) / (l2(i,nj,k)+eps)
       ls = 1.d0 / (inv_ls1 + inv_ls2+eps)
+      !>debug noslip
+      ls = l1(i,nj,k)
 
       coef1 = (2.d0 * dy) / (2.d0 * ls + dy)
       coef2 = (2.d0 * ls - dy) / (2.d0 * ls + dy)
