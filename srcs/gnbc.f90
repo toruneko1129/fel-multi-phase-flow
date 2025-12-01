@@ -111,7 +111,7 @@ subroutine gnbc(nID, ni, nj, nk, uk, wk, uwall_top, uwall_bot, theta_0_array, &
         
         !cox-voinov law
         !fix theta_t_rad to theta_0_rad -> No GNBC
-        theta_t_rad = theta_0_rad
+        !theta_t_rad = theta_0_rad
         g_micro = cox_voinov_lambda01(theta_t_rad)
         if (abs(i - idn_bot(k)) <= width) then
           g_macro = g_micro - (cox * 1.95d0 * u_cl / surface_tension)
@@ -199,7 +199,7 @@ end do
         
         !cox-voinov law
         !fix theta_t_rad to theta_0_rad -> No GNBC
-        theta_t_rad = theta_0_rad
+        !theta_t_rad = theta_0_rad
         g_micro = cox_voinov_lambda01(theta_t_rad)    
         if (abs(i - idn_top(k)) <= width) then
           g_macro = g_micro + (cox * 1.95d0 * u_cl / surface_tension)
