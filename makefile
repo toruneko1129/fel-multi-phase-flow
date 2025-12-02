@@ -46,6 +46,7 @@ dataou.f			 \
 fourn.f                          \
 init.f				 \
 init_q.f                         \
+init_u.f                         \
 mk_all.f			 \
 mk_center.f                      \
 mk_slice_k.f			 \

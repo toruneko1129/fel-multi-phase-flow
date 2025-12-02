@@ -266,7 +266,8 @@ bet_mthinc=2.0d0
 
 tscale  =1.0d0
 !nmax    =12000*nsv/32/tscale/2
-nmax    =24000*nsv/128
+!nmax    =24000*nsv/128
+nmax=24000
 idout   =1200000
 imkuvp  =1000000
 imkvtk  =nmax/240
@@ -365,7 +366,7 @@ call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi(-2,-2,-2,1))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call gnbc(nID, ni, nj, nk, u, w, uwall_top, uwall_bot, theta_0_array, &
           surface_tension, zeta_array, theta_array, dx, dz, phin(-2,-2,-2,1),.false.,delta_x,x_c,rmu, cox)
-call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,1),theta_array,dx,dy,dz)
+call bnd_contact_angle(nID,ni,nj,nk,phin(-2,-2,-2,1),theta_array,dx,dy,dz)
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,1))
 enddo
@@ -373,6 +374,11 @@ enddo
 call mpi_barrier(mpi_comm_world,ierr)
 call flush(6)
 call summation(ni,nj,nk,phi,nbub)
+
+!>init_u
+call init_u(ni,nj,nk,u ,(uwall_top+uwall_bot)/2.0d0)
+call init_u(ni,nj,nk,uo,(uwall_top+uwall_bot)/2.0d0)
+call init_u(ni,nj,nk,un,(uwall_top+uwall_bot)/2.0d0)
 
 call bndu(nID,ni,nj,nk,u ,v ,w ,uwall_top,uwall_bot,dy,l1_array,l2_array,phi(:,:,:,1))
 call bndu(nID,ni,nj,nk,uo,vo,wo,uwall_top,uwall_bot,dy,l1_array,l2_array,phi(:,:,:,1))
@@ -529,7 +535,8 @@ endif
 
 !call caldt(ipara,nID,ID,ndiv,ni,nj,nk,nstep,imon_t,dxinv,dyinv,dzinv,cfl,rhol,rhog,rmul,rmug,surface_tension,u,v,w,dt,time)
 !>tmp changed
-dt=64.0d-2/nsv*tscale*xscale/uscale
+!dt=64.0d-2/nsv*tscale*xscale/uscale
+dt=0.5d-2
 time=time+dt
 call mpi_barrier(mpi_comm_world,ierr)
 if(mod(nstep,imon_t).eq.0.and.ID.eq.0)then
@@ -555,7 +562,7 @@ call solphi_mthinc2(ni,nj,nk,dxinv,dyinv,dzinv,dt,u,v,w,flphix,flphiy,flphiz,phi
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call gnbc(nID, ni, nj, nk, u, w, uwall_top, uwall_bot, theta_0_array, &
           surface_tension, zeta_array, theta_array, dx, dz, phin(-2,-2,-2,1),.false.,delta_x,x_c,rmu, cox)
-call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,1),theta_array,dx,dy,dz)
+call bnd_contact_angle(nID,ni,nj,nk,phin(-2,-2,-2,1),theta_array,dx,dy,dz)
 !call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,1))
@@ -567,7 +574,7 @@ call solphi_mthinc3(ipara,ni,nj,nk,dxinv,dyinv,dzinv,bet_mthinc,phix,phiy,phiz,p
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call gnbc(nID, ni, nj, nk, u, w, uwall_top, uwall_bot, theta_0_array, &
           surface_tension, zeta_array, theta_array, dx, dz, phin(-2,-2,-2,1),.false.,delta_x,x_c,rmu, cox)
-call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,1),theta_array,dx,dy,dz)
+call bnd_contact_angle(nID,ni,nj,nk,phin(-2,-2,-2,1),theta_array,dx,dy,dz)
 !call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,1))
