@@ -43,6 +43,7 @@ real(8),dimension(:,:,:),allocatable :: sum_fst_u ,sum_fst_v ,sum_fst_w
 real(8),dimension(:,:,:),allocatable :: sum_fst_un,sum_fst_vn,sum_fst_wn
 real(8),dimension(:,:,:),allocatable :: src_u,src_v,src_w
 real(8),dimension(:,:,:),allocatable :: phix,phiy,phiz,flphix,flphiy,flphiz
+real(8),dimension(:,:,:),allocatable :: phiK, phiKn, phiL, phiLn
 real(8),dimension(:,:,:,:),allocatable :: phi,phin,phil_all
 real(8),dimension(:,:,:,:),allocatable :: s ,tau,sn,taun
 real(8),dimension(:,:,:,:),allocatable ::  rn_pp, rn_12, rn_13, rn_23,rkap
@@ -171,7 +172,7 @@ lscale = 1.0d-2
 
 xl=68.0d0*xscale
 yl=13.6d0*xscale
-zl=8.50d0*xscale/32.0d0
+zl=8.50d0*xscale
 
 rhol=8.1d-2
 rhog=8.1d-1
@@ -550,6 +551,7 @@ call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,1))
 call gnbc(nID, ni, nj, nk, u, w, uwall_top, uwall_bot, theta_0_array, &
           surface_tension, zeta_array, theta_array, dx, dz, phi(-2,-2,-2,1),.false.,delta_x,x_c,rmu, cox)
 call bnd_contact_angle(nID,ni,nj,nk,phi(-2,-2,-2,1),theta_array,dx,dy,dz)
+!call bnd_neumann(nID,ni,nj,nk,phi(-2,-2,-2,l))
 call bnd_periodic(ni,nj,nk,phi(-2,-2,-2,1))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phi(-2,-2,-2,1))
 
@@ -563,19 +565,19 @@ call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call gnbc(nID, ni, nj, nk, u, w, uwall_top, uwall_bot, theta_0_array, &
           surface_tension, zeta_array, theta_array, dx, dz, phin(-2,-2,-2,1),.false.,delta_x,x_c,rmu, cox)
 call bnd_contact_angle(nID,ni,nj,nk,phin(-2,-2,-2,1),theta_array,dx,dy,dz)
-!call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
+!call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,1))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,1))
 
 call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phin(-2,-2,-2,l),phix,phiy,phiz)
-call solphi_mthinc3(ipara,ni,nj,nk,dxinv,dyinv,dzinv,bet_mthinc,phix,phiy,phiz,phi(-2,-2,-2,l),phin(-2,-2,-2,l))
+!call solphi_mthinc3(ipara,ni,nj,nk,dxinv,dyinv,dzinv,bet_mthinc,phix,phiy,phiz,phi(-2,-2,-2,l),phin(-2,-2,-2,l))
 
 !>contact angle condition
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call gnbc(nID, ni, nj, nk, u, w, uwall_top, uwall_bot, theta_0_array, &
           surface_tension, zeta_array, theta_array, dx, dz, phin(-2,-2,-2,1),.false.,delta_x,x_c,rmu, cox)
 call bnd_contact_angle(nID,ni,nj,nk,phin(-2,-2,-2,1),theta_array,dx,dy,dz)
-!call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,l))
+!call bnd_neumann(nID,ni,nj,nk,phin(-2,-2,-2,1))
 call bnd_periodic(ni,nj,nk,phin(-2,-2,-2,1))
 call bnd_comm(ipara,nID,ni,nj,nk,key,sendjb,recvjb,phin(-2,-2,-2,1))
 enddo
@@ -614,13 +616,21 @@ call cal_div_tensor(ni,nj,nk,dxinv,dyinv,dzinv,tau ,vis_u ,vis_v ,vis_w )
 call init_q(ni,nj,nk,sum_fst_u,sum_fst_v,sum_fst_w)
 call init_q(ni,nj,nk,sum_fst_un,sum_fst_vn,sum_fst_wn)
 do l=1,nbub
-call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phi(-2,-2,-2,l),phix,phiy,phiz)
+call smooth_vof_csf(nID, ni, nj, nk, phi (-2,-2,-2,1),  phiK, theta_array, dx, dy, dz, 6) ! mκ用
+call smooth_vof_csf(nID, ni, nj, nk, phin(-2,-2,-2,1),  phiKn,theta_array, dx, dy, dz, 6)
+
+call smooth_vof_csf(nID, ni, nj, nk, phi (-2,-2,-2,1),  phiL, theta_array, dx, dy, dz, 6)    ! mL用
+call smooth_vof_csf(nID, ni, nj, nk, phin(-2,-2,-2,1),  phiLn,theta_array, dx, dy, dz, 6)
+
+call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phiK,phix,phiy,phiz)
+!call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phi(-2,-2,-2,l),phix,phiy,phiz)
 call calrn(ni,nj,nk,dxinv,dyinv,dzinv,1,1,1,phix,phiy,phiz,rn_pp)
 call calrn(ni,nj,nk,dxinv,dyinv,dzinv,0,0,1,phix,phiy,phiz,rn_12)
 call calrn(ni,nj,nk,dxinv,dyinv,dzinv,0,1,0,phix,phiy,phiz,rn_13)
 call calrn(ni,nj,nk,dxinv,dyinv,dzinv,1,0,0,phix,phiy,phiz,rn_23)
 
-call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phin(-2,-2,-2,l),phix,phiy,phiz)
+call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phiKn,phix,phiy,phiz)
+!call cal_grad_p2a(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phin(-2,-2,-2,l),phix,phiy,phiz)
 call calrn(ni,nj,nk,dxinv,dyinv,dzinv,1,1,1,phix,phiy,phiz,rnn_pp)
 call calrn(ni,nj,nk,dxinv,dyinv,dzinv,0,0,1,phix,phiy,phiz,rnn_12)
 call calrn(ni,nj,nk,dxinv,dyinv,dzinv,0,1,0,phix,phiy,phiz,rnn_13)
@@ -629,10 +639,12 @@ call calrn(ni,nj,nk,dxinv,dyinv,dzinv,1,0,0,phix,phiy,phiz,rnn_23)
 call calrkap(ni,nj,nk,dxinv,dyinv,dzinv, rn_pp, rn_12, rn_13, rn_23,rkap )
 call calrkap(ni,nj,nk,dxinv,dyinv,dzinv,rnn_pp,rnn_12,rnn_13,rnn_23,rkapn)
 
-call cal_grad_p2uvw(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phi(-2,-2,-2,l),phix,phiy,phiz)
+call cal_grad_p2uvw(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phiL,phix,phiy,phiz)
+!call cal_grad_p2uvw(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phi(-2,-2,-2,l),phix,phiy,phiz)
 call calfst(ni,nj,nk,rhol,rhog,surface_tension,phix,phiy,phiz,rkap,fst_u,fst_v,fst_w)
 
-call cal_grad_p2uvw(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phin(-2,-2,-2,l),phix,phiy,phiz)
+call cal_grad_p2uvw(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phiLn,phix,phiy,phiz)
+!call cal_grad_p2uvw(ID,svall(2),ni,nj,nk,dxinv,dyinv_array,dzinv,phin(-2,-2,-2,l),phix,phiy,phiz)
 call calfst(ni,nj,nk,rhol,rhog,surface_tension,phix,phiy,phiz,rkapn,fst_un,fst_vn,fst_wn)
 call sum_fst(ni,nj,nk,fst_u,fst_v,fst_w,sum_fst_u,sum_fst_v,sum_fst_w)
 call sum_fst(ni,nj,nk,fst_un,fst_vn,fst_wn,sum_fst_un,sum_fst_vn,sum_fst_wn)

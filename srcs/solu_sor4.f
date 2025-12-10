@@ -127,7 +127,7 @@
 cc
 cc<sor4
 cc
-      do lp=0,20
+      do lp=0,50
       err=0.0d0
 
       do lsor4=1,8
@@ -290,7 +290,7 @@ cc
 
       err=sqrt(err/dble(ni*nj*nk*ndiv))+1.0d-99
       if(lp.eq.0)err0=err
-      if(err/err0.le.1.0d-3)goto 100
+      if(err/err0.le.1.0d-6)goto 100
       enddo
 
  100  continue

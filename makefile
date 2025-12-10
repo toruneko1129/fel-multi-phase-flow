@@ -97,6 +97,7 @@ find_two_contacts_on_wall_index.f90 \
 mkvtk_velocity.f90     \
 mkvtk_velocity_nj.f90     \
 mkvtk_phi_cell.f90 \
+smooth_vof_csf.f90 \
 main.f90            \
 
 SRCS	=	$(addprefix $(SRCDIR)/, $(F90SRCS)) \

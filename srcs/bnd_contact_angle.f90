@@ -1,5 +1,3 @@
-!<impose the contact angle boundary condition on qk
-!<give the static contact angle theta_0 and grid space dx, dy
 subroutine bnd_contact_angle(nID, ni, nj, nk, qk, theta_array, dx, dy, dz)
   implicit none
   include 'param.h'
@@ -10,115 +8,92 @@ subroutine bnd_contact_angle(nID, ni, nj, nk, qk, theta_array, dx, dy, dz)
   real*8, intent(in)     :: dx, dy, dz
 
   integer :: i, k
-  real*8 :: pi, eps, theta_rad, cos_t, sin_t
-  real*8 :: gx, gz, gt, nq_x, nq_y, nq_z, norm
-  real*8 :: facx, facz, denomx, denomz
+  real*8 :: pi, eps, theta_rad, s, c, cot_t
+  real*8 :: gx, gz, gt, dqdY
 
-  pi   = acos(-1.0d0)
-  eps  = 1.0d-20
-  facx = 0.5d0 * dy / dx     ! = dy/(2*dx)
-  facz = 0.5d0 * dy / dz     ! = dy/(2*dz)
+  pi  = acos(-1.0d0)
+  eps = 1.0d-14   ! 1e-20 でもいいが、勾配計算だとこれくらいの方が安定しやすい
 
   !======================================================
-  ! Y−面（j = 0 層）
-  ! 事前に qk の x/z 周期ゴーストが埋まっている前提で
-  ! i=1..ni, k=1..nk の中央差分を用いる
+  ! 下壁 (Y_MINUS): 壁法線 = +y (s_w = +1)
+  ! 勾配は interior の j=1 で評価
   !======================================================
   if (nID(Y_MINUS) .lt. 0) then
-!$OMP PARALLEL DO PRIVATE(i,k,theta_rad,cos_t,sin_t,gx,gz,gt, &
-!$OMP&                     nq_x,nq_y,nq_z,norm,denomx,denomz) &
-!$OMP&                   SHARED(ni,nj,nk,qk,theta_array,pi,eps,facx,facz)
+!$OMP PARALLEL DO PRIVATE(i,k,theta_rad,s,c,cot_t,gx,gz,gt,dqdY) &
+!$OMP& SHARED(ni,nk,qk,theta_array,dx,dy,dz,pi,eps)
     do k = 1, nk
       do i = 1, ni
         theta_rad = theta_array(i,1,k) * (pi/180.0d0)
-        cos_t     = cos(theta_rad)
-        sin_t     = sin(theta_rad)
+        s = sin(theta_rad)
+        c = cos(theta_rad)
 
-        ! 壁面での接線勾配（中央差分）
+        ! 壁面内（x,z）の接線勾配：中央差分（周期ゴーストが先に入っている前提）
         gx = (qk(i+1,1,k)   - qk(i-1,1,k))   / (2.0d0*dx)
-        gz = (qk(i,  1,k+1) - qk(i,  1,k-1)) / (2.0d0*dz)
+        !gz = (qk(i,  1,k+1) - qk(i,  1,k-1)) / (2.0d0*dz)
+        gz = 0.0d0
         gt = sqrt(gx*gx + gz*gz)
 
-        ! 法線ベクトル（下壁は +ŷ）
-        if (gt .le. eps) then
-          nq_x = 0.0d0
-          nq_z = 0.0d0
+        ! sin(theta)->0 や gt->0 のときは爆発するので、自然に Neumann(∂y=0)へ退避
+        if (gt .le. eps .or. abs(s) .le. eps) then
+          qk(i,0,k)  = qk(i,1,k)
         else
-          nq_x = -sin_t * gx / (gt + eps)
-          nq_z = -sin_t * gz / (gt + eps)
-        end if
-        nq_y = +cos_t
-
-        ! 規格化（数値安定）
-        norm = sqrt(nq_x*nq_x + nq_y*nq_y + nq_z*nq_z) + eps
-        nq_x = nq_x / norm
-        nq_y = nq_y / norm
-        nq_z = nq_z / norm
-
-        ! 高次外挿：q0 = q1 - (∂q/∂y)*(dy/2)、かつ ∂q/∂y = -(ny/nx)∂x q - (ny/nz)∂z q
-        denomx = nq_x
-        denomz = nq_z
-        qk(i,0,k) = qk(i,1,k)
-        if (abs(denomx) .gt. eps) then
-          qk(i,0,k) = qk(i,0,k) - (nq_y/(denomx)) * (qk(i+1,1,k)-qk(i-1,1,k)) * facx
-        end if
-        if (abs(denomz) .gt. eps) then
-          qk(i,0,k) = qk(i,0,k) - (nq_y/(denomz)) * (qk(i,1,k+1)-qk(i,1,k-1)) * facz
+          cot_t = c / s
+          ! dqdY = -s_w*gt*cot(theta),  下壁は s_w=+1
+          dqdY = - gt * cot_t
+          ! (q1 - q0)/dy = dqdY  ->  q0 = q1 - dy*dqdY
+          qk(i,0,k)  = qk(i,1,k) - dy*dqdY
         end if
 
-        ! ゴーストセル（線形外挿）
+        ! 追加ゴースト：線形外挿（必要な段数だけ）
         qk(i,-1,k) = 2.0d0*qk(i,0,k)  - qk(i,1,k)
         qk(i,-2,k) = 2.0d0*qk(i,-1,k) - qk(i,0,k)
+
+        ! VOFなら念のためクリップ（任意）
+        ! qk(i,0,k)  = max(0.0d0, min(1.0d0, qk(i,0,k)))
+        ! qk(i,-1,k) = max(0.0d0, min(1.0d0, qk(i,-1,k)))
+        ! qk(i,-2,k) = max(0.0d0, min(1.0d0, qk(i,-2,k)))
       end do
     end do
 !$OMP END PARALLEL DO
   end if
 
+
   !======================================================
-  ! Y＋面（j = nj+1, nj+2, …）
-  ! 上壁は壁法線が −ŷ である点に注意
+  ! 上壁 (Y_PLUS): 壁法線 = -y (s_w = -1)
+  ! 勾配は interior の j=nj で評価
+  ! ★あなたの現行コードのバグ：上壁なのに nq_y=cosθ のまま（符号が違う）
   !======================================================
   if (nID(Y_PLUS) .lt. 0) then
-!$OMP PARALLEL DO PRIVATE(i,k,theta_rad,cos_t,sin_t,gx,gz,gt, &
-!$OMP&                     nq_x,nq_y,nq_z,norm,denomx,denomz) &
-!$OMP&                   SHARED(ni,nj,nk,qk,theta_array,pi,eps,facx,facz)
+!$OMP PARALLEL DO PRIVATE(i,k,theta_rad,s,c,cot_t,gx,gz,gt,dqdY) &
+!$OMP& SHARED(ni,nk,nj,qk,theta_array,dx,dy,dz,pi,eps)
     do k = 1, nk
       do i = 1, ni
         theta_rad = theta_array(i,nj,k) * (pi/180.0d0)
-        cos_t     = cos(theta_rad)
-        sin_t     = sin(theta_rad)
+        s = sin(theta_rad)
+        c = cos(theta_rad)
 
         gx = (qk(i+1,nj,k)   - qk(i-1,nj,k))   / (2.0d0*dx)
-        gz = (qk(i,  nj,k+1) - qk(i,  nj,k-1)) / (2.0d0*dz)
+        !gz = (qk(i,  nj,k+1) - qk(i,  nj,k-1)) / (2.0d0*dz)
+        gz = 0.0d0
         gt = sqrt(gx*gx + gz*gz)
 
-        ! 法線（上壁は −ŷ）
-        if (gt .le. eps) then
-          nq_x = 0.0d0
-          nq_z = 0.0d0
+        if (gt .le. eps .or. abs(s) .le. eps) then
+          qk(i,nj+1,k) = qk(i,nj,k)
         else
-          nq_x = -sin_t * gx / (gt + eps)
-          nq_z = -sin_t * gz / (gt + eps)
-        end if
-        nq_y = cos_t
-
-        norm = sqrt(nq_x*nq_x + nq_y*nq_y + nq_z*nq_z) + eps
-        nq_x = nq_x / norm
-        nq_y = nq_y / norm
-        nq_z = nq_z / norm
-
-        qk(i,nj+1,k) = qk(i,nj,k)
-        denomx = nq_x
-        denomz = nq_z
-        if (abs(denomx) .gt. eps) then
-          qk(i,nj+1,k) = qk(i,nj+1,k) - (nq_y/(denomx)) * (qk(i+1,nj,k)-qk(i-1,nj,k)) * facx
-        end if
-        if (abs(denomz) .gt. eps) then
-          qk(i,nj+1,k) = qk(i,nj+1,k) - (nq_y/(denomz)) * (qk(i,  nj,k+1)-qk(i,  nj,k-1)) * facz
+          cot_t = c / s
+          ! dqdY = -s_w*gt*cot(theta),  上壁は s_w=-1 -> dqdY = +gt*cot
+          dqdY = + gt * cot_t
+          ! (q_{nj+1}-q_{nj})/dy = dqdY -> q_{nj+1} = q_{nj} + dy*dqdY
+          qk(i,nj+1,k) = qk(i,nj,k) + dy*dqdY
         end if
 
         qk(i,nj+2,k) = 2.0d0*qk(i,nj+1,k) - qk(i,nj,k)
         qk(i,nj+3,k) = 2.0d0*qk(i,nj+2,k) - qk(i,nj+1,k)
+
+        ! VOFなら任意でクリップ
+        ! qk(i,nj+1,k) = max(0.0d0, min(1.0d0, qk(i,nj+1,k)))
+        ! qk(i,nj+2,k) = max(0.0d0, min(1.0d0, qk(i,nj+2,k)))
+        ! qk(i,nj+3,k) = max(0.0d0, min(1.0d0, qk(i,nj+3,k)))
       end do
     end do
 !$OMP END PARALLEL DO
